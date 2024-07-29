@@ -33,7 +33,19 @@ def generate_launch_description():
         ]
     )
 
+    game_observer_node = Node(
+        package="oxebots_observers",
+        executable="game_observer_node",
+        name="game_observer_node",
+        parameters=[
+            {
+                "robot_amount": 3
+            }
+        ]
+    )
+
     ld.add_action(game_receiver_node)
     ld.add_action(sender_node)
+    ld.add_action(game_observer_node)
 
     return ld
