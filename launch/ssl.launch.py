@@ -32,7 +32,28 @@ def generate_launch_description():
         package='oxebots_comms',
         executable='game_receiver_node',
         name='game_receiver_node',
-        parameters=[{'port': 10006}, {'robot_amount': 3}, {'is_yellow_team': True}],
+        parameters=[
+            {'ssl_vision_ip': '127.0.0.2'},
+            {'ssl_vision_port': 10006},
+            {'interface_ip': ''},
+            {'topic_retention': 10},
+            {'robot_topic': 'robot_data'},
+            {'ball_topic': 'ball_data'},
+            {'is_yellow_team': False},
+        ],
+    )
+
+    gc_receiver_node = Node(
+        package='oxebots_comms',
+        executable='gc_receiver_node',
+        name='gc_receiver_node',
+        parameters=[
+            {'referee_ip': '224.0.0.0'},
+            {'referee_port': 10006},
+            {'interface_ip': ''},
+            {'topic_retention': 10},
+            {'gc_topic_name': 'gc_data'},
+        ],
     )
 
     game_observer_node = Node(
@@ -43,6 +64,7 @@ def generate_launch_description():
     )
 
     ld.add_action(game_receiver_node)
+    ld.add_action(gc_receiver_node)
     ld.add_action(sender_node)
     ld.add_action(game_observer_node)
 
