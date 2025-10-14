@@ -13,7 +13,7 @@ game_receiver_node:
     topic_retention: 10
     robot_topic: "robot_data"
     ball_topic: "ball_data"
-    is_yellow_team: true
+    is_yellow_team: false
 
 game_observer_node:
   ros__parameters:
