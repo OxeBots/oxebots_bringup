@@ -37,6 +37,13 @@ def generate_launch_description():
         parameters=[config_file],
     )
 
+    gc_receiver_node = Node(
+        package="oxebots_comms",
+        executable="gc_receiver_node",
+        name="gc_receiver_node",
+        parameters=[config_file],
+    )
+
     # Include Strategy Launch File
     strategy_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
@@ -48,5 +55,6 @@ def generate_launch_description():
     ld.add_action(grSim_controller_node)
     ld.add_action(game_observer_node)
     ld.add_action(strategy_launch)
+    ld.add_action(gc_receiver_node)
 
     return ld

@@ -15,6 +15,14 @@ game_receiver_node:
     ball_topic: "ball_data"
     is_yellow_team: false
 
+gc_receiver_node:
+  ros__parameters:
+    referee_ip: "224.5.23.1"
+    referee_port: 10003
+    interface_ip: ""
+    topic_retention: 10
+    gc_topic_name: "gc_data"
+
 game_observer_node:
   ros__parameters:
     robot_amount: 3
