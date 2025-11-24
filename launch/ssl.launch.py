@@ -2,13 +2,22 @@ import os
 
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import IncludeLaunchDescription
+from launch.actions import IncludeLaunchDescription, DeclareLaunchArgument
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
+from launch.substitutions import LaunchConfiguration
 
 
 def generate_launch_description():
     ld = LaunchDescription()
+
+    # Argumento para a cor do time
+    declare_is_yellow_arg = DeclareLaunchArgument(
+        'is_yellow',
+        default_value='false', # Valor padrão, pode ser sobrescrito
+        description='Whether the team is yellow (true) or blue (false)'
+    )
+    is_yellow = LaunchConfiguration('is_yellow')
 
     # Paths
     bringup_pkg_share = get_package_share_directory("oxebots_bringup")
@@ -48,9 +57,11 @@ def generate_launch_description():
     strategy_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             os.path.join(strategy_pkg_share, "launch", "strategy.launch.py")
-        )
+        ),
+        launch_arguments={'is_yellow': is_yellow}.items()
     )
 
+    ld.add_action(declare_is_yellow_arg)
     ld.add_action(game_receiver_node)
     ld.add_action(grSim_controller_node)
     ld.add_action(game_observer_node)
