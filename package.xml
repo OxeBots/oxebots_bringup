@@ -3,9 +3,9 @@
 <package format="3">
   <name>oxebots_bringup</name>
   <version>0.0.0</version>
-  <description>TODO: Package description</description>
+  <description>Starting point for bringing up the Oxebots SSL software</description>
   <maintainer email="ce.cesc01@gmail.com">carlos</maintainer>
-  <license>TODO: License declaration</license>
+  <license>GPLv3</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
   <exec_depend>ament_index_python</exec_depend>
