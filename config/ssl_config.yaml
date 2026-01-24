@@ -1,0 +1,28 @@
+grSim_controller_node:
+  ros__parameters:
+    simulator_ip: "127.0.0.1" # (Localhost)
+    simulator_port: 10301
+    is_yellow_team: true
+    command_topic: "robot_commands"
+
+game_receiver_node:
+  ros__parameters:
+    ssl_vision_ip: "224.5.23.2" # (Multicast)
+    ssl_vision_port: 10020
+    interface_ip: ""
+    topic_retention: 10
+    robot_topic: "robot_data"
+    ball_topic: "ball_data"
+    is_yellow_team: false
+
+gc_receiver_node:
+  ros__parameters:
+    referee_ip: "224.5.23.1" # (Multicast)
+    referee_port: 10003
+    interface_ip: ""
+    topic_retention: 10
+    gc_topic_name: "gc_data"
+
+game_observer_node:
+  ros__parameters:
+    robot_amount: 3
