@@ -7,7 +7,7 @@ grSim_controller_node:
 
 game_receiver_node:
   ros__parameters:
-    ssl_vision_ip: "224.5.23.2" # (Multicast)
+    ssl_vision_ip: "127.0.0.1" # (Multicast)
     ssl_vision_port: 10020
     interface_ip: ""
     topic_retention: 10

@@ -32,14 +32,14 @@ def generate_launch_description():
         package="oxebots_comms",
         executable="grSim_controller_node",
         name="grSim_controller_node",
-        parameters=[bringup_config_file],
+        parameters=[bringup_config_file, {"is_yellow_team": is_yellow}],
     )
 
     game_receiver_node = Node(
         package="oxebots_comms",
         executable="game_receiver_node",
         name="game_receiver_node",
-        parameters=[bringup_config_file],
+        parameters=[bringup_config_file, {"is_yellow_team": is_yellow}],
     )
 
     game_observer_node = Node(
