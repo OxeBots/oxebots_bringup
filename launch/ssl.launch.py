@@ -49,6 +49,12 @@ def generate_launch_description():
         parameters=[bringup_config_file],
     )
 
+    field_visualizer_node = Node(
+        package="oxebots_observers",
+        executable="field_visualizer_node",
+        name="field_visualizer_node",
+    )
+
     gc_receiver_node = Node(
         package="oxebots_comms",
         executable="gc_receiver_node",
@@ -76,6 +82,7 @@ def generate_launch_description():
     ld.add_action(game_receiver_node)
     ld.add_action(grSim_controller_node)
     ld.add_action(game_observer_node)
+    ld.add_action(field_visualizer_node)
     ld.add_action(strategy_launch)
     ld.add_action(gc_receiver_node)
     ld.add_action(rviz_node)
