@@ -1,23 +1,28 @@
+/**:
+  ros__parameters:
+    is_yellow_team: false 
+    max_linear_speed: 1.0 
+    p_gain_linear: 1.5    
+
 grSim_controller_node:
   ros__parameters:
-    simulator_ip: "127.0.0.1" # (Localhost)
-    simulator_port: 10301
-    is_yellow_team: true
+    simulator_ip: "127.0.0.1" 
+    simulator_port: 10301 
+    interface_ip: ""
     command_topic: "robot_commands"
 
 game_receiver_node:
   ros__parameters:
-    ssl_vision_ip: "127.0.0.1" # (Multicast)
+    ssl_vision_ip: "224.5.23.2" 
     ssl_vision_port: 10020
     interface_ip: ""
     topic_retention: 10
     robot_topic: "robot_data"
     ball_topic: "ball_data"
-    is_yellow_team: false
 
 gc_receiver_node:
   ros__parameters:
-    referee_ip: "224.5.23.1" # (Multicast)
+    referee_ip: "224.5.23.1" 
     referee_port: 10003
     interface_ip: ""
     topic_retention: 10
@@ -26,3 +31,8 @@ gc_receiver_node:
 game_observer_node:
   ros__parameters:
     robot_amount: 3
+
+strategy_node:
+  ros__parameters:
+    bt_xml_path: "test_roles.xml"
+    execution_rate: 60.0

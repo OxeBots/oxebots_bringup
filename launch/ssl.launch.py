@@ -11,13 +11,6 @@ from launch_ros.actions import Node
 def generate_launch_description():
     ld = LaunchDescription()
 
-    declare_is_yellow_arg = DeclareLaunchArgument(
-        "is_yellow",
-        default_value="false",
-        description="Whether the team is yellow (true) or blue (false)",
-    )
-    is_yellow = LaunchConfiguration("is_yellow")
-
     bringup_pkg_share = get_package_share_directory("oxebots_bringup")
     strategy_pkg_share = get_package_share_directory("oxebots_strategy")
     bringup_config_file = os.path.join(
@@ -32,14 +25,14 @@ def generate_launch_description():
         package="oxebots_comms",
         executable="grSim_controller_node",
         name="grSim_controller_node",
-        parameters=[bringup_config_file, {"is_yellow_team": is_yellow}],
+        parameters=[bringup_config_file],
     )
 
     game_receiver_node = Node(
         package="oxebots_comms",
         executable="game_receiver_node",
         name="game_receiver_node",
-        parameters=[bringup_config_file, {"is_yellow_team": is_yellow}],
+        parameters=[bringup_config_file],
     )
 
     game_observer_node = Node(
@@ -74,11 +67,9 @@ def generate_launch_description():
     strategy_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             os.path.join(strategy_pkg_share, "launch", "strategy.launch.py")
-        ),
-        launch_arguments={"is_yellow": is_yellow}.items(),
+        )
     )
 
-    ld.add_action(declare_is_yellow_arg)
     ld.add_action(game_receiver_node)
     ld.add_action(grSim_controller_node)
     ld.add_action(game_observer_node)
