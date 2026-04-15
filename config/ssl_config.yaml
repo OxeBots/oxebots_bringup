@@ -1,19 +1,19 @@
 /**:
   ros__parameters:
-    is_yellow_team: false 
-    max_linear_speed: 1.0 
-    p_gain_linear: 1.5    
+    is_yellow_team: true # Color set to Yellow
+    max_linear_speed: 1.0
+    p_gain_linear: 1.5
 
 grSim_controller_node:
   ros__parameters:
-    simulator_ip: "127.0.0.1" 
-    simulator_port: 10301 
+    simulator_ip: "127.0.0.1" # Unicast IP for the simulator
+    simulator_port: 10301 # Base port (will auto-switch to 10302 for Yellow)
     interface_ip: ""
     command_topic: "robot_commands"
 
 game_receiver_node:
   ros__parameters:
-    ssl_vision_ip: "224.5.23.2" 
+    ssl_vision_ip: "224.5.23.2" # Multicast for Vision
     ssl_vision_port: 10020
     interface_ip: ""
     topic_retention: 10
@@ -22,7 +22,7 @@ game_receiver_node:
 
 gc_receiver_node:
   ros__parameters:
-    referee_ip: "224.5.23.1" 
+    referee_ip: "224.5.23.1" # Multicast for Referee
     referee_port: 10003
     interface_ip: ""
     topic_retention: 10
@@ -34,5 +34,5 @@ game_observer_node:
 
 strategy_node:
   ros__parameters:
-    bt_xml_path: "test_roles.xml"
+    bt_xml_path: "test_tree.xml"
     execution_rate: 60.0
