@@ -3,6 +3,8 @@
     is_yellow_team: true # Color set to Yellow
     max_linear_speed: 1.0
     p_gain_linear: 1.5
+    bt_xml_path: "test_tree.xml"
+    execution_rate: 60.0
 
 grSim_controller_node:
   ros__parameters:
@@ -32,7 +34,3 @@ game_observer_node:
   ros__parameters:
     robot_amount: 3
 
-strategy_node:
-  ros__parameters:
-    bt_xml_path: "test_tree.xml"
-    execution_rate: 60.0
