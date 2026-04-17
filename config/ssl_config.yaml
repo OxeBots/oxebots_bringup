@@ -1,9 +1,9 @@
 /**:
   ros__parameters:
-    is_yellow_team: true # Color set to Yellow
-    max_linear_speed: 1.0
+    is_yellow_team: true
+    max_linear_speed: 1.5
     p_gain_linear: 1.5
-    bt_xml_path: "test_tree.xml"
+    bt_xml_path: "simple_attack.xml"
     execution_rate: 60.0
 
 grSim_controller_node:
