@@ -35,3 +35,4 @@ game_observer_node:
     robot_inflation_radius: 150.0
     vision_topic: "/ssl_vision_bridge/vision_messages"
     publisher_topic: "game_data"
+    referee_topic: "/gc_multicast_bridge/referee_messages"
