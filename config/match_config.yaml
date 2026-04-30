@@ -1,0 +1,37 @@
+/**:
+  ros__parameters:
+    is_yellow_team: true
+    team_size: 3
+    bt_xml_path: "simple_attack.xml"
+    execution_rate: 60.0
+
+# 1. Configuração do Simulador (SEU nó de controle)
+grSim_controller_node:
+  ros__parameters:
+    simulator_ip: "192.168.0.10" # IP do computador rodando o grSim
+    simulator_port: 10301
+    interface_ip: ""
+    command_topic: "robot_commands"
+
+# 2. Configuração do Bridge A-TEAM (Recepção)
+ssl_vision_bridge:
+  ros__parameters:
+    ssl_vision_ip: "224.5.23.2"
+    ssl_vision_port: 10020
+    # COLOQUE O SEU IP LOCAL ABAIXO (Hostname -I)
+    net_interface_address: "192.168.0.10" 
+
+gc_multicast_bridge:
+  ros__parameters:
+    multicast.address: "224.5.23.1"
+    multicast.port: 10003
+    net_interface_address: "192.168.0.10"
+
+# 3. Configuração do Observador (Nosso Tradutor Corrigido)
+game_observer_node:
+  ros__parameters:
+    robot_amount: 3
+    map_resolution: 0.05
+    robot_inflation_radius: 150.0
+    vision_topic: "/ssl_vision_bridge/vision_messages"
+    publisher_topic: "game_data"
