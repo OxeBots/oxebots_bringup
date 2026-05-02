@@ -1,9 +1,9 @@
 /**:
   ros__parameters:
-    is_yellow_team: true
+    is_yellow_team: false
     max_linear_speed: 1.5
     p_gain_linear: 1.5
-    bt_xml_path: "simple_attack.xml"
+    bt_xml_path: "master_strategy.xml"
     execution_rate: 60.0
 
 grSim_controller_node:

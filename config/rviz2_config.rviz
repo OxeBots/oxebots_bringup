@@ -162,6 +162,24 @@ Visualization Manager:
         History Policy: Keep Last
         Reliability Policy: Reliable
         Value: /field_markers
+    - Class: rviz_default_plugins/Marker
+      Enabled: true
+      Name: Attack Intent
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /attack_intent_marker
+    - Class: rviz_default_plugins/Marker
+      Enabled: true
+      Name: Robot Intent
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /robot_intent_markers
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
