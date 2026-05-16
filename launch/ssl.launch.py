@@ -77,6 +77,15 @@ def generate_launch_description():
         )
     )
 
+    # Role Assigner Node
+    role_assigner_node = Node(
+        package="oxebots_strategy",
+        executable="role_assigner_node",
+        name="role_assigner_node",
+        parameters=[bringup_config_file],
+        output="screen",
+    )
+
     ld.add_action(game_receiver_node)
     ld.add_action(grSim_controller_node)
     ld.add_action(game_observer_node)
@@ -84,6 +93,7 @@ def generate_launch_description():
     ld.add_action(strategy_launch)
     ld.add_action(gc_receiver_node)
     ld.add_action(kalman_filter_node)
+    ld.add_action(role_assigner_node)
     ld.add_action(rviz_node)
 
     return ld

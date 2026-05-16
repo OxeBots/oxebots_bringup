@@ -73,6 +73,15 @@ def generate_launch_description():
         )
     )
 
+    # 8. Role Assigner
+    role_assigner = Node(
+        package="oxebots_strategy",
+        executable="role_assigner_node",
+        name="role_assigner_node",
+        parameters=[bringup_config_file],
+        output="screen",
+    )
+
     # Adicionando na ordem original de processamento
     ld.add_action(vision_bridge)
     ld.add_action(gc_bridge)
@@ -80,6 +89,7 @@ def generate_launch_description():
     ld.add_action(game_observer)
     ld.add_action(field_visualizer)
     ld.add_action(strategy_launch)
+    ld.add_action(role_assigner)
     ld.add_action(rviz)
 
     return ld
