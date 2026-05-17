@@ -2,8 +2,9 @@ import os
 
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import IncludeLaunchDescription
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 
 
@@ -15,6 +16,13 @@ def generate_launch_description():
     
     bringup_config_file = os.path.join(bringup_pkg_share, "config", "match_config.yaml")
     rviz_config_file = os.path.join(bringup_pkg_share, "config", "rviz2_config.rviz")
+
+    # Argumento para escolher a árvore
+    declare_bt_xml_arg = DeclareLaunchArgument(
+        "bt_xml",
+        default_value="",
+        description="Behavior Tree XML file name",
+    )
 
     # 1. Bridge de Visão (A-TEAM)
     vision_bridge = Node(
@@ -71,7 +79,11 @@ def generate_launch_description():
         PythonLaunchDescriptionSource(
             os.path.join(strategy_pkg_share, "launch", "strategy.launch.py")
         ),
-        launch_arguments={"invert_sides": "True"}.items()
+        launch_arguments={
+            "invert_sides": "True",
+            "bt_xml": LaunchConfiguration("bt_xml"),
+            "config_file": bringup_config_file
+        }.items()
     )
 
     # 8. Role Assigner
@@ -83,6 +95,7 @@ def generate_launch_description():
         output="screen",
     )
 
+    ld.add_action(declare_bt_xml_arg)
     ld.add_action(vision_bridge)
     ld.add_action(gc_bridge)
     ld.add_action(ra_controller)

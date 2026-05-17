@@ -74,7 +74,18 @@ def generate_launch_description():
     strategy_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             os.path.join(strategy_pkg_share, "launch", "strategy.launch.py")
-        )
+        ),
+        launch_arguments={
+            "bt_xml": LaunchConfiguration("bt_xml"),
+            "config_file": bringup_config_file
+        }.items()
+    )
+
+    # Argumento para escolher a árvore
+    declare_bt_xml_arg = DeclareLaunchArgument(
+        "bt_xml",
+        default_value="",
+        description="Behavior Tree XML file name",
     )
 
     # Role Assigner Node
@@ -86,6 +97,7 @@ def generate_launch_description():
         output="screen",
     )
 
+    ld.add_action(declare_bt_xml_arg)
     ld.add_action(game_receiver_node)
     ld.add_action(grSim_controller_node)
     ld.add_action(game_observer_node)

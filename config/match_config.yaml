@@ -1,6 +1,6 @@
 /**:
   ros__parameters:
-    is_yellow_team: false
+    is_yellow_team: true
     team_size: 3
     bt_xml_path: "master_strategy.xml"
     execution_rate: 60.0
