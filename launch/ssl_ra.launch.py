@@ -65,6 +65,14 @@ def generate_launch_description():
         parameters=[bringup_config_file],
     )
 
+    # Kalman Filter (OxeBots)
+    kalman_filter = Node(
+        package="oxebots_prediction",
+        executable="kalman_filter_node",
+        name="kalman_filter_node",
+        parameters=[bringup_config_file],
+    )
+
     # 6. RViz2
     rviz = Node(
         package="rviz2",
@@ -101,6 +109,7 @@ def generate_launch_description():
     ld.add_action(ra_controller)
     ld.add_action(game_observer)
     ld.add_action(field_visualizer)
+    ld.add_action(kalman_filter)
     ld.add_action(strategy_launch)
     ld.add_action(role_assigner)
     ld.add_action(rviz)

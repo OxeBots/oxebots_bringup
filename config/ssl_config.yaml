@@ -3,7 +3,7 @@
     is_yellow_team: false
     max_linear_speed: 1.5
     p_gain_linear: 1.5
-    bt_xml_path: "goalkeeper_tree.xml"
+    bt_xml_path: "test_prediction.xml"
     execution_rate: 60.0
 
 grSim_controller_node:
