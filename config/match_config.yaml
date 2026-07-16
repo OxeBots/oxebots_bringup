@@ -5,7 +5,7 @@
     bt_xml_path: "master_strategy.xml"
     execution_rate: 60.0
 
-# 1. Configuração do Simulador (SEU nó de controle)
+# 1. Configuração do Simulador 
 grSim_controller_node:
   ros__parameters:
     simulator_ip: "127.0.0.1" # IP do computador rodando o grSim
@@ -13,7 +13,7 @@ grSim_controller_node:
     interface_ip: ""
     command_topic: "robot_commands"
 
-# 2. Configuração do Bridge A-TEAM (Recepção)
+# 2. Configuração do Bridge A-TEAM 
 ssl_vision_bridge:
   ros__parameters:
     ssl_vision_ip: "224.5.23.2"
@@ -27,7 +27,7 @@ gc_multicast_bridge:
     multicast.port: 10003
     net_interface_address: ""
 
-# 3. Configuração do Observador (Nosso Tradutor Corrigido)
+# 3. Configuração do Observador 
 game_observer_node:
   ros__parameters:
     robot_amount: 3
