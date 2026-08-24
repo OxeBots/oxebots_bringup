@@ -59,7 +59,7 @@ def generate_launch_description():
     # 5. NRF24L01 improvisado
     nrf24_bridge = Node(
         package="oxebots_comms",
-        executable="Adapt.py",
+        executable="nrf24_bridge_node",
         name="nrf24_hardware_bridge",
     )
 
