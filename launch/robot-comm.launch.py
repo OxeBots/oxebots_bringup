@@ -6,7 +6,6 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 
-
 def generate_launch_description():
     ld = LaunchDescription()
 
@@ -19,7 +18,7 @@ def generate_launch_description():
     # Argumento para escolher a árvore
     declare_bt_xml_arg = DeclareLaunchArgument(
         "bt_xml",
-        default_value="robot.xml",
+        default_value="",
         description="Behavior Tree XML file name",
     )
 
@@ -56,11 +55,19 @@ def generate_launch_description():
         name="field_visualizer_node",
     )
 
-    # 5. NRF24L01 improvisado
+    # 5. NRF24L para comunicação com os robos
     nrf24_bridge = Node(
         package="oxebots_comms",
         executable="nrf24_bridge_node",
         name="nrf24_hardware_bridge",
+    )
+
+    # 6. RA Controller
+    ra_controller = Node(
+        package="oxebots_comms",
+        executable="ra_controller_node",
+        name="ra_controller_node",
+        parameters=[bringup_config_file],
     )
 
     # Kalman Filter (OxeBots)
@@ -71,7 +78,7 @@ def generate_launch_description():
         parameters=[bringup_config_file],
     )
 
-    # 6. RViz2
+    # 7. RViz2
     rviz = Node(
         package="rviz2",
         executable="rviz2",
@@ -80,7 +87,7 @@ def generate_launch_description():
         output="screen",
     )
 
-    # 7. Include Strategy
+    # 8. Include Strategy
     strategy_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             os.path.join(strategy_pkg_share, "launch", "strategy.launch.py")
@@ -92,7 +99,7 @@ def generate_launch_description():
         }.items()
     )
 
-    # 8. Role Assigner
+    # 9. Role Assigner
     role_assigner = Node(
         package="oxebots_strategy",
         executable="role_assigner_node",
@@ -105,6 +112,7 @@ def generate_launch_description():
     ld.add_action(vision_bridge)
     ld.add_action(gc_bridge)
     ld.add_action(nrf24_bridge)
+    ld.add_action(ra_controller)
     ld.add_action(game_observer)
     ld.add_action(field_visualizer)
     ld.add_action(kalman_filter)
