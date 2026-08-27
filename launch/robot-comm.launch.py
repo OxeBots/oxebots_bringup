@@ -18,7 +18,7 @@ def generate_launch_description():
     # Argumento para escolher a árvore
     declare_bt_xml_arg = DeclareLaunchArgument(
         "bt_xml",
-        default_value="",
+        default_value="master_strategy.xml",
         description="Behavior Tree XML file name",
     )
 
@@ -60,6 +60,7 @@ def generate_launch_description():
         package="oxebots_comms",
         executable="nrf24_bridge_node",
         name="nrf24_hardware_bridge",
+        parameters=[bringup_config_file],
     )
 
     # 6. RA Controller
