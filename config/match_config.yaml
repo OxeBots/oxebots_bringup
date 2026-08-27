@@ -5,7 +5,7 @@
     bt_xml_path: "master_strategy.xml"
     execution_rate: 60.0
 
-# 1. Configuração do Simulador
+# 1. Configuração do Simulador 
 grSim_controller_node:
   ros__parameters:
     simulator_ip: "127.0.0.1" # IP do computador rodando o grSim
