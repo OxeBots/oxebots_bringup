@@ -61,6 +61,7 @@ def generate_launch_description():
         executable="nrf24_bridge_node",
         name="nrf24_hardware_bridge",
         parameters=[bringup_config_file],
+        output="screen"
     )
 
     # 6. RA Controller
