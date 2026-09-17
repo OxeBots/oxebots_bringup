@@ -43,7 +43,6 @@ strategy_node:
     gc_topic: "/gc_multicast_bridge/referee_messages"
 
 # 5. Configuração da comunicação com os robôs
-#OBS: os endereços rx e tcx tem que ter 5 chars (lambda de decode no nNrf24.cpp)
 nrf24_hardware_bridge:
   ros__parameters:
     radio_rx_address: "ADMIN"
