@@ -2,7 +2,7 @@
   ros__parameters:
     is_yellow_team: false
     team_size: 3
-    bt_xml_path: "master_strategy.xml"
+    bt_xml_path: "master_strategy_carry.xml"
     execution_rate: 60.0
 
 # 1. Configuração do Simulador 
