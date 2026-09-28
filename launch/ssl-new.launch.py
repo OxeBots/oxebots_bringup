@@ -2,94 +2,91 @@ import os
 
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, OpaqueFunction
+from launch.conditions import IfCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 
-def generate_launch_description():
-    ld = LaunchDescription()
-    
+
+def launch_setup(context, *args, **kwargs):
     bringup_pkg_share = get_package_share_directory("oxebots_bringup")
     strategy_pkg_share = get_package_share_directory("oxebots_strategy")
     
-    bringup_config_file = os.path.join(bringup_pkg_share, "config", "match_config.yaml")
     rviz_config_file = os.path.join(bringup_pkg_share, "config", "rviz2_config.rviz")
 
-    # Argumento para escolher a árvore
-    declare_bt_xml_arg = DeclareLaunchArgument(
-        "bt_xml",
-        default_value="",
-        description="Behavior Tree XML file name",
-    )
+    config_file = LaunchConfiguration("config_file").perform(context)
+    team_color = LaunchConfiguration("team_color").perform(context).strip().lower()
+    bt_xml = LaunchConfiguration("bt_xml").perform(context).strip()
+    use_rviz = LaunchConfiguration("use_rviz").perform(context).strip().lower() in ["true", "1", "yes"]
 
-    # 1. Bridge de Visão (A-TEAM) - Substitui o game_receiver proprietário
+    if not config_file:
+        if team_color == "yellow":
+            config_file = os.path.join(bringup_pkg_share, "config", "match_config_yellow.yaml")
+        elif team_color == "blue":
+            config_file = os.path.join(bringup_pkg_share, "config", "match_config_blue.yaml")
+        else:
+            config_file = os.path.join(bringup_pkg_share, "config", "match_config.yaml")
+
+    # 1. Bridge de Visão (A-TEAM)
     vision_bridge = Node(
         package="ssl_ros_bridge",
         executable="vision_bridge_node",
         name="ssl_vision_bridge",
-        parameters=[bringup_config_file],
+        parameters=[config_file],
         output="screen"
     )
 
-    # 2. Bridge do Juiz (A-TEAM) - Substitui o gc_receiver proprietário
+    # 2. Bridge do Juiz (A-TEAM)
     gc_bridge = Node(
         package="ssl_ros_bridge",
         executable="gc_multicast_bridge_node",
         name="gc_multicast_bridge",
-        parameters=[bringup_config_file],
+        parameters=[config_file],
         output="screen"
     )
 
-    # 3. Game Observer (OxeBots) - Atua como tradutor e gera o mapa
+    # 3. Game Observer (OxeBots)
     game_observer = Node(
         package="oxebots_observers",
         executable="game_observer_node",
         name="game_observer_node",
-        parameters=[bringup_config_file],
+        parameters=[config_file],
     )
 
-    # 4. Field Visualizer (OxeBots) - Mantido igual ao original
+    # 4. Field Visualizer (OxeBots)
     field_visualizer = Node(
         package="oxebots_observers",
         executable="field_visualizer_node",
         name="field_visualizer_node",
     )
 
-    # 5. grSim Controller (OxeBots) - Mantido para atuação proprietária
+    # 5. grSim Controller (OxeBots)
     grSim_controller = Node(
         package="oxebots_comms",
         executable="grSim_controller_node",
         name="grSim_controller_node",
-        parameters=[bringup_config_file],
+        parameters=[config_file],
     )
 
-    # Kalman Filter (OxeBots)
+    # 6. Kalman Filter (OxeBots)
     kalman_filter = Node(
         package="oxebots_prediction",
         executable="kalman_filter_node",
         name="kalman_filter_node",
-        parameters=[bringup_config_file],
+        parameters=[config_file],
     )
 
-    # 6. RViz2 - Monitoramento visual
-    rviz = Node(
-        package="rviz2",
-        executable="rviz2",
-        name="rviz2",
-        arguments=["-d", rviz_config_file],
-        output="screen",
-    )
+    # 7. Include Strategy (Behavior Trees e Planejamento)
+    strategy_args = {"config_file": config_file}
+    if bt_xml:
+        strategy_args["bt_xml"] = bt_xml
 
-    # 7. Include Strategy - Mantém Behavior Trees e Planejamento
     strategy_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             os.path.join(strategy_pkg_share, "launch", "strategy.launch.py")
         ),
-        launch_arguments={
-            "bt_xml": LaunchConfiguration("bt_xml"),
-            "config_file": bringup_config_file
-        }.items()
+        launch_arguments=strategy_args.items()
     )
 
     # 8. Role Assigner
@@ -97,20 +94,64 @@ def generate_launch_description():
         package="oxebots_strategy",
         executable="role_assigner_node",
         name="role_assigner_node",
-        parameters=[bringup_config_file],
+        parameters=[config_file],
         output="screen",
     )
 
-    # Adicionando na ordem original de processamento
-    ld.add_action(declare_bt_xml_arg)
-    ld.add_action(vision_bridge)
-    ld.add_action(gc_bridge)
-    ld.add_action(grSim_controller)
-    ld.add_action(game_observer)
-    ld.add_action(field_visualizer)
-    ld.add_action(kalman_filter)
-    ld.add_action(strategy_launch)
-    ld.add_action(role_assigner)
-    ld.add_action(rviz)
+    nodes = [
+        vision_bridge,
+        gc_bridge,
+        grSim_controller,
+        game_observer,
+        field_visualizer,
+        kalman_filter,
+        strategy_launch,
+        role_assigner,
+    ]
 
-    return ld
+    # 9. RViz2 (Opcional)
+    if use_rviz:
+        rviz = Node(
+            package="rviz2",
+            executable="rviz2",
+            name="rviz2",
+            arguments=["-d", rviz_config_file],
+            output="screen",
+        )
+        nodes.append(rviz)
+
+    return nodes
+
+
+def generate_launch_description():
+    declare_config_file_arg = DeclareLaunchArgument(
+        "config_file",
+        default_value="",
+        description="Path to YAML configuration file (overrides team_color)",
+    )
+
+    declare_team_color_arg = DeclareLaunchArgument(
+        "team_color",
+        default_value="",
+        description="Team color: 'blue' or 'yellow' (selects match_config_<color>.yaml)",
+    )
+
+    declare_bt_xml_arg = DeclareLaunchArgument(
+        "bt_xml",
+        default_value="",
+        description="Behavior Tree XML file name",
+    )
+
+    declare_use_rviz_arg = DeclareLaunchArgument(
+        "use_rviz",
+        default_value="True",
+        description="Whether to start RViz2",
+    )
+
+    return LaunchDescription([
+        declare_config_file_arg,
+        declare_team_color_arg,
+        declare_bt_xml_arg,
+        declare_use_rviz_arg,
+        OpaqueFunction(function=launch_setup)
+    ])

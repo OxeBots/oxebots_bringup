@@ -1,15 +1,15 @@
 /**:
   ros__parameters:
-    is_yellow_team: false
+    is_yellow_team: true
     team_size: 3
-    bt_xml_path: "master_strategy_carry.xml"
+    bt_xml_path: "master_strategy.xml"
     execution_rate: 60.0
 
 # 1. Configuração do Simulador 
 grSim_controller_node:
   ros__parameters:
     simulator_ip: "127.0.0.1" # IP do computador rodando o grSim
-    simulator_port: 10301
+    simulator_port: 10302
     interface_ip: ""
     command_topic: "robot_commands"
 
@@ -43,7 +43,6 @@ strategy_node:
     gc_topic: "/gc_multicast_bridge/referee_messages"
 
 # 5. Configuração da comunicação com os robôs
-#OBS: os endereços rx e tcx tem que ter 5 chars (lambda de decode no nNrf24.cpp)
 nrf24_hardware_bridge:
   ros__parameters:
     radio_rx_address: "ADMIN"

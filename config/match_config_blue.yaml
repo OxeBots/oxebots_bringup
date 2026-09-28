@@ -2,7 +2,7 @@
   ros__parameters:
     is_yellow_team: false
     team_size: 3
-    bt_xml_path: "master_strategy_carry.xml"
+    bt_xml_path: "master_strategy.xml"
     execution_rate: 60.0
 
 # 1. Configuração do Simulador 
@@ -43,7 +43,6 @@ strategy_node:
     gc_topic: "/gc_multicast_bridge/referee_messages"
 
 # 5. Configuração da comunicação com os robôs
-#OBS: os endereços rx e tcx tem que ter 5 chars (lambda de decode no nNrf24.cpp)
 nrf24_hardware_bridge:
   ros__parameters:
     radio_rx_address: "ADMIN"
