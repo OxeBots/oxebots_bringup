@@ -18,7 +18,7 @@ def generate_launch_description():
     # Argumento para escolher a árvore
     declare_bt_xml_arg = DeclareLaunchArgument(
         "bt_xml",
-        default_value="master_strategy.xml",
+        default_value="master_strategy_carry.xml",
         description="Behavior Tree XML file name",
     )
 
