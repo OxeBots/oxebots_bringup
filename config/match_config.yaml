@@ -23,13 +23,13 @@ ssl_vision_bridge:
     # silêncio — se nenhuma funcionar (comum em rede de devcontainer), fica escutando sem
     # receber nada e sem nenhum erro visível. IP fixo da interface que recebe o tráfego
     # multicast do grSim neste ambiente; ajustar se mudar de máquina/rede.
-    net_interface_address: "192.168.0.27"
+    net_interface_address: ""
 
 gc_multicast_bridge:
   ros__parameters:
     multicast.address: "224.5.23.1"
     multicast.port: 10003
-    net_interface_address: "192.168.0.27"
+    net_interface_address: ""
 
 # 3. Configuração do Observador 
 game_observer_node:
