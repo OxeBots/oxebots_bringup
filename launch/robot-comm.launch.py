@@ -22,6 +22,14 @@ def generate_launch_description():
         description="Behavior Tree XML file name",
     )
 
+    # Argumento para escolher o formato do comando enviado pro radio: "velocity" (atual, vx/vy/w
+    # a cada tick) ou "point" (setpoint de trajetoria, robo calcula a velocidade de roda local)
+    declare_command_mode_arg = DeclareLaunchArgument(
+        "command_mode",
+        default_value="velocity",
+        description="Radio command format: 'velocity' (vx/vy/w) or 'point' (trajectory setpoint)",
+    )
+
     # 1. Bridge de Visão (A-TEAM)
     vision_bridge = Node(
         package="ssl_ros_bridge",
@@ -60,7 +68,7 @@ def generate_launch_description():
         package="oxebots_comms",
         executable="nrf24_bridge_node",
         name="nrf24_hardware_bridge",
-        parameters=[bringup_config_file],
+        parameters=[bringup_config_file, {"command_mode": LaunchConfiguration("command_mode")}],
         output="screen"
     )
 
@@ -111,6 +119,7 @@ def generate_launch_description():
     )
 
     ld.add_action(declare_bt_xml_arg)
+    ld.add_action(declare_command_mode_arg)
     ld.add_action(vision_bridge)
     ld.add_action(gc_bridge)
     ld.add_action(nrf24_bridge)
