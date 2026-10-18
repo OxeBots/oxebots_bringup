@@ -5,24 +5,19 @@
     bt_xml_path: "master_strategy_carry.xml"
     execution_rate: 60.0
 
-# 1. Configuração do Simulador 
+# Simulator controller configuration
 grSim_controller_node:
   ros__parameters:
-    simulator_ip: "127.0.0.1" # IP do computador rodando o grSim
+    simulator_ip: "127.0.0.1"
     simulator_port: 10302
     interface_ip: ""
     command_topic: "robot_commands"
 
-# 2. Configuração do Bridge A-TEAM
+# SSL-Vision and Game Controller multicast bridges
 ssl_vision_bridge:
   ros__parameters:
     ssl_vision_ip: "224.5.23.2"
     ssl_vision_port: 10020
-    # Vazio ("") tenta entrar no grupo multicast em TODAS as interfaces detectadas
-    # (GetIpAdresses em multicast_receiver.cpp) e engole qualquer exceção por interface em
-    # silêncio — se nenhuma funcionar (comum em rede de devcontainer), fica escutando sem
-    # receber nada e sem nenhum erro visível. IP fixo da interface que recebe o tráfego
-    # multicast do grSim neste ambiente; ajustar se mudar de máquina/rede.
     net_interface_address: ""
 
 gc_multicast_bridge:
@@ -31,7 +26,7 @@ gc_multicast_bridge:
     multicast.port: 10003
     net_interface_address: ""
 
-# 3. Configuração do Observador 
+# Game observer and occupancy grid generation
 game_observer_node:
   ros__parameters:
     robot_amount: 3
@@ -41,12 +36,12 @@ game_observer_node:
     publisher_topic: "game_data"
     referee_topic: "/gc_multicast_bridge/referee_messages"
 
-# 4. Configuração da Estratégia
+# Strategy node configuration
 strategy_node:
   ros__parameters:
     gc_topic: "/gc_multicast_bridge/referee_messages"
 
-# 5. Configuração da comunicação com os robôs
+# NRF24 radio hardware bridge configuration (RX and TX addresses must be 5 characters)
 nrf24_hardware_bridge:
   ros__parameters:
     radio_rx_address: "ADMIN"
