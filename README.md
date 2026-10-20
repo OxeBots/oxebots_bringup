@@ -102,6 +102,7 @@ O arquivo `ssl-new.launch.py` substitui os antigos launches separados e permite 
 | Flag | Valores Aceitos | Padrão | Comportamento |
 | :--- | :--- | :--- | :--- |
 | `mode` | `grsim`, `ra`, `game` | `grsim` | Escolhe o backend de comunicação: **grSim** (`grsim`), **ER-Force/Ra** (`ra`) ou **Jogo Real c/ Rádio NRF24** (`game`). |
+| `command_mode` | `velocity`, `point` | `velocity` | Formato do comando enviado pelo rádio (`mode:=game`): `velocity` (velocidades locais vx/vy/w) ou `point` (setpoint de trajetória). |
 | `invert_sides` | `True`, `False`, `""` | Auto (`False` no `grsim` e `game`, `True` no `ra`) | Inverte as coordenadas do campo (`x = -x`, `y = -y`, `θ += π`) e o lado dos gols. Se omitido, ativa automaticamente apenas no `ra` e fica desativado (`False`) no `grsim` e `game`. Pode ser forçado manualmente em qualquer modo. |
 | `config_file` | Caminho para `.yaml` | `match_config.yaml` | Permite passar um arquivo YAML específico. Se vazio, usa `match_config.yaml` (ou o YAML correspondente a `team_color`). |
 | `team_color` | `blue`, `yellow`, `""` | `""` (usa o `match_config.yaml`) | Atalho opcional para carregar diretamente `match_config_blue.yaml` ou `match_config_yellow.yaml`. |

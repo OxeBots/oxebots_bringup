@@ -39,6 +39,7 @@ def create_team_stack(
     invert_sides,
     bt_xml,
     use_rviz,
+    command_mode='velocity',
 ):
     """Create the list of nodes and launch actions for a single team stack."""
     vision_bridge = Node(
@@ -85,7 +86,7 @@ def create_team_stack(
             package='oxebots_comms',
             executable='nrf24_bridge_node',
             name='nrf24_hardware_bridge',
-            parameters=[config_file],
+            parameters=[config_file, {'command_mode': command_mode}],
             output='screen',
         )
         ra_controller = Node(
@@ -172,6 +173,9 @@ def launch_setup(context, *args, **kwargs):
         in ['true', '1', 'yes']
     )
     mode = LaunchConfiguration('mode').perform(context).strip().lower()
+    command_mode = (
+        LaunchConfiguration('command_mode').perform(context).strip().lower()
+    )
     invert_sides_raw = (
         LaunchConfiguration('invert_sides').perform(context).strip().lower()
     )
@@ -214,6 +218,7 @@ def launch_setup(context, *args, **kwargs):
                 invert_sides,
                 bt_xml,
                 blue_rviz,
+                command_mode=command_mode,
             )
             actions.append(
                 GroupAction([
@@ -235,6 +240,7 @@ def launch_setup(context, *args, **kwargs):
                 invert_sides,
                 bt_xml,
                 yellow_rviz,
+                command_mode=command_mode,
             )
             actions.append(
                 GroupAction([
@@ -268,6 +274,7 @@ def launch_setup(context, *args, **kwargs):
         invert_sides,
         bt_xml,
         use_rviz,
+        command_mode=command_mode,
     )
 
 
@@ -277,6 +284,12 @@ def generate_launch_description():
         'mode',
         default_value='grsim',
         description="Communication mode: 'grsim' (default), 'ra', or 'game'",
+    )
+
+    declare_command_mode_arg = DeclareLaunchArgument(
+        'command_mode',
+        default_value='velocity',
+        description="Radio command format: 'velocity' (vx/vy/w) or 'point' (trajectory setpoint)",
     )
 
     declare_invert_sides_arg = DeclareLaunchArgument(
@@ -344,6 +357,7 @@ def generate_launch_description():
 
     return LaunchDescription([
         declare_mode_arg,
+        declare_command_mode_arg,
         declare_invert_sides_arg,
         declare_match_arg,
         declare_rviz_team_arg,
