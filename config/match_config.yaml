@@ -5,7 +5,7 @@
     bt_xml_path: "master_strategy.xml"
     execution_rate: 60.0
 
-# 1. Configuração do Simulador 
+# 1. Configuração do Simulador
 grSim_controller_node:
   ros__parameters:
     simulator_ip: "127.0.0.1" # IP do computador rodando o grSim
@@ -27,7 +27,7 @@ gc_multicast_bridge:
     multicast.port: 10003
     net_interface_address: ""
 
-# 3. Configuração do Observador 
+# 3. Configuração do Observador
 game_observer_node:
   ros__parameters:
     robot_amount: 3
