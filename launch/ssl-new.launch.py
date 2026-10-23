@@ -2,8 +2,11 @@ import os
 
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, OpaqueFunction
-from launch.conditions import IfCondition
+from launch.actions import (
+    DeclareLaunchArgument,
+    IncludeLaunchDescription,
+    OpaqueFunction,
+)
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
@@ -12,7 +15,6 @@ from launch_ros.actions import Node
 def launch_setup(context, *args, **kwargs):
     bringup_pkg_share = get_package_share_directory("oxebots_bringup")
     strategy_pkg_share = get_package_share_directory("oxebots_strategy")
-    
     rviz_config_file = os.path.join(bringup_pkg_share, "config", "rviz2_config.rviz")
 
     config_file = LaunchConfiguration("config_file").perform(context)
