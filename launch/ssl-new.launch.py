@@ -58,6 +58,14 @@ def create_team_stack(
         output='screen',
     )
 
+    team_client = Node(
+        package='ssl_ros_bridge',
+        executable='team_client_node',
+        name='team_client_node',
+        parameters=[config_file],
+        output='screen',
+    )
+
     referee_state = Node(
         package='oxebots_strategy',
         executable='referee_state_node',
@@ -145,6 +153,7 @@ def create_team_stack(
     nodes = [
         vision_bridge,
         gc_bridge,
+        team_client,
         referee_state,
         *comm_nodes,
         game_observer,

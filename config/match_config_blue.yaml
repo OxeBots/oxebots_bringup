@@ -26,6 +26,15 @@ gc_multicast_bridge:
     multicast.port: 10003
     net_interface_address: ""
 
+team_client_node:
+  ros__parameters:
+    gc_ip_address: ""
+    gc_port: 10008
+    # Para testar com o Game Controller, altere team_name para o mesmo nome selecionado na interface do GC
+    team_name: "OxeBots"
+    team_color: "blue"
+    ping_period: 5.0
+
 # Game observer and occupancy grid generation
 game_observer_node:
   ros__parameters:
