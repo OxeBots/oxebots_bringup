@@ -57,9 +57,14 @@ Aplicados a todos os nós que declaram essas chaves (`strategy_node`, `d_star_pl
 ### 2.4. Observador de Jogo (`game_observer_node`)
 | Parâmetro | Tipo | Valor Padrão | Descrição |
 | :--- | :--- | :--- | :--- |
-| `robot_amount` | `int` | `3` | Número esperado de robôs aliados. |
+| `team_size` | `int` | `3` | Número de robôs por equipe em campo. |
 | `map_resolution` | `double` | `0.05` | Resolução (em metros/célula, `0.05` = 5 cm) da grade de ocupação `/map` gerada para o D* Lite. |
 | `robot_inflation_radius` | `double` | `150.0` | Raio de inflação dos obstáculos (robôs) no mapa estático em milímetros. |
+| `min_ball_confidence` | `double` | `0.3` | Confiança mínima de detecção da visão para aceitar a bola. |
+| `min_robot_confidence` | `double` | `0.3` | Confiança mínima de detecção da visão para aceitar robôs. |
+| `robot_expiration_ms` | `double` | `500.0` | Tempo sem detecção (ms) para marcar um robô como fora de campo. |
+| `ball_expiration_ms` | `double` | `500.0` | Tempo sem detecção (ms) para marcar a bola como perdida. |
+| `multi_camera_window_ms`| `double` | `8.0` | Janela de tempo (ms) para fusão de detecções redundantes entre câmeras. |
 | `vision_topic` | `string` | `"/ssl_vision_bridge/vision_messages"` | Tópico de entrada vindo da ponte de visão. |
 | `publisher_topic` | `string` | `"game_data"` | Tópico consolidado publicado com estado de robôs e bola. |
 | `referee_topic` | `string` | `"/gc_multicast_bridge/referee_messages"` | Tópico de entrada com comandos do juiz. |
@@ -88,10 +93,11 @@ O arquivo `ssl-new.launch.py` substitui os antigos launches separados e permite 
    * `mode:=ra` $\rightarrow$ Sobe `ra_controller_node` (converte velocidades globais para referenciais locais para o simulador ER-Force/Ra).
    * `mode:=game` $\rightarrow$ Sobe `nrf24_bridge_node` (envio via rádio USB NRF24 para os robôs reais) + `ra_controller_node`.
 6. **`kalman_filter_node`** (`oxebots_prediction`): Filtragem e predição de posição/velocidade da bola e dos robôs.
-7. **`strategy.launch.py`** (`oxebots_strategy`): Sobe, para cada robô (`0, 1, 2`), o trio:
+7. **`strategy.launch.py`** (`oxebots_strategy`): Sobe, para cada robô (`0, 1, 2`), o conjunto:
    * `d_star_planner_node_<id>` (Planejamento de trajetória D* Lite / Straight Line)
    * `path_follower_node_<id>` (`movement_calculation_node` — controle linear/angular, chute e proteção dinâmica de área)
    * `strategy_node_<id>` (Execução da Behavior Tree e Blackboard)
+   * `trajectory_setpoint_node_<id>` (Geração de setpoints de trajetória para rádio NRF24)
 8. **`role_assigner_node`** (`oxebots_strategy`): Atribuição dinâmica de papéis com histerese (`/role_assignment`).
 9. **`rviz2`** (Opcional): Interface gráfica pré-configurada com `rviz2_config.rviz`.
 
