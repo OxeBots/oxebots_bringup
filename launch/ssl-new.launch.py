@@ -58,6 +58,14 @@ def create_team_stack(
         output='screen',
     )
 
+    referee_state = Node(
+        package='oxebots_strategy',
+        executable='referee_state_node',
+        name='referee_state_node',
+        parameters=[config_file],
+        output='screen',
+    )
+
     game_observer = Node(
         package='oxebots_observers',
         executable='game_observer_node',
@@ -137,6 +145,7 @@ def create_team_stack(
     nodes = [
         vision_bridge,
         gc_bridge,
+        referee_state,
         *comm_nodes,
         game_observer,
         field_visualizer,
