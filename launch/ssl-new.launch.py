@@ -21,42 +21,16 @@ from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import (
     DeclareLaunchArgument,
-<<<<<<< HEAD
-    IncludeLaunchDescription,
-    OpaqueFunction,
-=======
     GroupAction,
     IncludeLaunchDescription,
     OpaqueFunction,
     SetEnvironmentVariable,
->>>>>>> e1f64ec
 )
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 
 
-<<<<<<< HEAD
-def launch_setup(context, *args, **kwargs):
-    bringup_pkg_share = get_package_share_directory("oxebots_bringup")
-    strategy_pkg_share = get_package_share_directory("oxebots_strategy")
-    rviz_config_file = os.path.join(bringup_pkg_share, "config", "rviz2_config.rviz")
-
-    config_file = LaunchConfiguration("config_file").perform(context)
-    team_color = LaunchConfiguration("team_color").perform(context).strip().lower()
-    bt_xml = LaunchConfiguration("bt_xml").perform(context).strip()
-    use_rviz = LaunchConfiguration("use_rviz").perform(context).strip().lower() in ["true", "1", "yes"]
-
-    if not config_file:
-        if team_color == "yellow":
-            config_file = os.path.join(bringup_pkg_share, "config", "match_config_yellow.yaml")
-        elif team_color == "blue":
-            config_file = os.path.join(bringup_pkg_share, "config", "match_config_blue.yaml")
-        else:
-            config_file = os.path.join(bringup_pkg_share, "config", "match_config.yaml")
-
-    # 1. Bridge de Visão (A-TEAM)
-=======
 def create_team_stack(
     config_file,
     strategy_pkg_share,
@@ -68,7 +42,6 @@ def create_team_stack(
     command_mode='velocity',
 ):
     """Create the list of nodes and launch actions for a single team stack."""
->>>>>>> e1f64ec
     vision_bridge = Node(
         package='ssl_ros_bridge',
         executable='vision_bridge_node',
@@ -394,9 +367,5 @@ def generate_launch_description():
         declare_team_color_arg,
         declare_bt_xml_arg,
         declare_use_rviz_arg,
-<<<<<<< HEAD
-        OpaqueFunction(function=launch_setup)
-=======
         OpaqueFunction(function=launch_setup),
->>>>>>> e1f64ec
     ])
