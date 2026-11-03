@@ -4,6 +4,7 @@
     team_size: 3
     bt_xml_path: "master_strategy_carry.xml"
     execution_rate: 60.0
+    require_gc: true
 
 # Simulator controller configuration
 grSim_controller_node:
@@ -49,12 +50,17 @@ game_observer_node:
 strategy_node:
   ros__parameters:
     gc_topic: "/gc_multicast_bridge/referee_messages"
+    require_gc: false
+    max_gc_ms: 500.0
+    max_pose_ms: 150.0
+    max_ball_ms: 300.0
 
 # Referee state node configuration
 referee_state_node:
   ros__parameters:
     gc_topic: "/gc_multicast_bridge/referee_messages"
     ball_topic: "ball_data"
+    require_gc: false
     stale_timeout_ms: 500.0
     ball_moved_mm: 50.0
     kick_timeout_s: 10.0

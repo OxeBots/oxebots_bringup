@@ -40,13 +40,20 @@ def create_team_stack(
     bt_xml,
     use_rviz,
     command_mode='velocity',
+    require_gc='',
 ):
     """Create the list of nodes and launch actions for a single team stack."""
+    bringup_pkg_share = get_package_share_directory('oxebots_bringup')
+    base_config = os.path.join(bringup_pkg_share, 'config', 'match_config.yaml')
+    config_params = [base_config]
+    if os.path.abspath(config_file) != os.path.abspath(base_config):
+        config_params.append(config_file)
+
     vision_bridge = Node(
         package='ssl_ros_bridge',
         executable='vision_bridge_node',
         name='ssl_vision_bridge',
-        parameters=[config_file],
+        parameters=config_params,
         output='screen',
     )
 
@@ -54,7 +61,7 @@ def create_team_stack(
         package='ssl_ros_bridge',
         executable='gc_multicast_bridge_node',
         name='gc_multicast_bridge',
-        parameters=[config_file],
+        parameters=config_params,
         output='screen',
     )
 
@@ -62,15 +69,19 @@ def create_team_stack(
         package='ssl_ros_bridge',
         executable='team_client_node',
         name='team_client_node',
-        parameters=[config_file],
+        parameters=config_params,
         output='screen',
     )
+
+    referee_params = list(config_params)
+    if require_gc:
+        referee_params.append({'require_gc': require_gc.lower() in ('true', '1')})
 
     referee_state = Node(
         package='oxebots_strategy',
         executable='referee_state_node',
         name='referee_state_node',
-        parameters=[config_file],
+        parameters=referee_params,
         output='screen',
     )
 
@@ -78,7 +89,7 @@ def create_team_stack(
         package='oxebots_observers',
         executable='game_observer_node',
         name='game_observer_node',
-        parameters=[config_file, {'invert_sides': invert_sides}],
+        parameters=[*config_params, {'invert_sides': invert_sides}],
     )
 
     field_visualizer = Node(
@@ -94,7 +105,7 @@ def create_team_stack(
             package='oxebots_comms',
             executable='ra_controller_node',
             name='ra_controller_node',
-            parameters=[config_file],
+            parameters=config_params,
         )
         comm_nodes.append(ra_controller)
     elif mode == 'game':
@@ -102,14 +113,14 @@ def create_team_stack(
             package='oxebots_comms',
             executable='nrf24_bridge_node',
             name='nrf24_hardware_bridge',
-            parameters=[config_file, {'command_mode': command_mode}],
+            parameters=[*config_params, {'command_mode': command_mode}],
             output='screen',
         )
         ra_controller = Node(
             package='oxebots_comms',
             executable='ra_controller_node',
             name='ra_controller_node',
-            parameters=[config_file],
+            parameters=config_params,
         )
         comm_nodes.extend([nrf24_bridge, ra_controller])
     else:
@@ -117,7 +128,7 @@ def create_team_stack(
             package='oxebots_comms',
             executable='grSim_controller_node',
             name='grSim_controller_node',
-            parameters=[config_file],
+            parameters=config_params,
         )
         comm_nodes.append(grsim_controller)
 
@@ -125,7 +136,7 @@ def create_team_stack(
         package='oxebots_prediction',
         executable='kalman_filter_node',
         name='kalman_filter_node',
-        parameters=[config_file],
+        parameters=config_params,
     )
 
     strategy_args = {
@@ -134,6 +145,8 @@ def create_team_stack(
     }
     if bt_xml:
         strategy_args['bt_xml'] = bt_xml
+    if require_gc:
+        strategy_args['require_gc'] = require_gc
 
     strategy_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
@@ -146,7 +159,7 @@ def create_team_stack(
         package='oxebots_strategy',
         executable='role_assigner_node',
         name='role_assigner_node',
-        parameters=[config_file],
+        parameters=config_params,
         output='screen',
     )
 
@@ -184,6 +197,7 @@ def launch_setup(context, *args, **kwargs):
     rviz_config_file = os.path.join(bringup_pkg_share, 'config', 'rviz2_config.rviz')
 
     config_file = LaunchConfiguration('config_file').perform(context).strip()
+    require_gc = LaunchConfiguration('require_gc').perform(context).strip()
     team_color = LaunchConfiguration('team_color').perform(context).strip().lower()
     bt_xml = LaunchConfiguration('bt_xml').perform(context).strip()
     use_rviz = (
@@ -237,6 +251,7 @@ def launch_setup(context, *args, **kwargs):
                 bt_xml,
                 blue_rviz,
                 command_mode=command_mode,
+                require_gc=require_gc,
             )
             actions.append(
                 GroupAction([
@@ -259,6 +274,7 @@ def launch_setup(context, *args, **kwargs):
                 bt_xml,
                 yellow_rviz,
                 command_mode=command_mode,
+                require_gc=require_gc,
             )
             actions.append(
                 GroupAction([
@@ -293,6 +309,7 @@ def launch_setup(context, *args, **kwargs):
         bt_xml,
         use_rviz,
         command_mode=command_mode,
+        require_gc=require_gc,
     )
 
 
@@ -373,6 +390,12 @@ def generate_launch_description():
         description='Whether to start RViz2 (in single-team mode)',
     )
 
+    declare_require_gc_arg = DeclareLaunchArgument(
+        'require_gc',
+        default_value='',
+        description="Override require_gc for referee and strategy (e.g. 'False' for standalone testing without GC)",
+    )
+
     return LaunchDescription([
         declare_mode_arg,
         declare_command_mode_arg,
@@ -385,5 +408,6 @@ def generate_launch_description():
         declare_team_color_arg,
         declare_bt_xml_arg,
         declare_use_rviz_arg,
+        declare_require_gc_arg,
         OpaqueFunction(function=launch_setup),
     ])
