@@ -73,6 +73,8 @@ role_assigner_node:
   ros__parameters:
     time_hysteresis: 1.0  # tempo mínimo (s) entre trocas (padrão do código: 2.0)
     hysteresis: 1.5       # vantagem de custo para tomar o papel do atacante (padrão do código: 2.5)
+    ball_flight_speed_mps: 1.0  # bola mais rápida que isto = chute em voo: papéis congelados (0 desliga)
+    receive_distance_mm: 300.0  # candidato a menos disto da bola E bola lenta (<80% do limite de voo) = recepcionou: libera a troca
 
 # NRF24 radio hardware bridge configuration (RX and TX addresses must be 5 characters)
 nrf24_hardware_bridge:
