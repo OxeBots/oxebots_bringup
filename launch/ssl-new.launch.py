@@ -29,6 +29,19 @@ from launch.actions import (
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
+import yaml
+
+
+def read_is_yellow_team(config_paths):
+    """Return is_yellow_team from the YAML files (the last file wins), or None if absent."""
+    is_yellow = None
+    for path in config_paths:
+        with open(path) as config:
+            data = yaml.safe_load(config) or {}
+        params = (data.get('/**') or {}).get('ros__parameters') or {}
+        if 'is_yellow_team' in params:
+            is_yellow = bool(params['is_yellow_team'])
+    return is_yellow
 
 
 def create_team_stack(
@@ -65,11 +78,18 @@ def create_team_stack(
         output='screen',
     )
 
+    # O team_client_node não lê is_yellow_team (ele é do pacote ssl_ros_bridge): a cor com que ele
+    # se registra no GC vem do mesmo is_yellow_team do YAML, para existir uma fonte só.
+    team_client_params = list(config_params)
+    is_yellow_team = read_is_yellow_team(config_params)
+    if is_yellow_team is not None:
+        team_client_params.append({'team_color': 'yellow' if is_yellow_team else 'blue'})
+
     team_client = Node(
         package='ssl_ros_bridge',
         executable='team_client_node',
         name='team_client_node',
-        parameters=config_params,
+        parameters=team_client_params,
         output='screen',
     )
 

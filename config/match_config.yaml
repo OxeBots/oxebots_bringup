@@ -33,7 +33,7 @@ team_client_node:
     gc_port: 10008
     # Para testar com o Game Controller, altere team_name para o mesmo nome selecionado na interface do GC
     team_name: "OxeBots"
-    team_color: "yellow"
+    # team_color não é definido aqui: o ssl-new.launch.py o deriva de is_yellow_team (topo do arquivo).
     ping_period: 5.0
 
 # Game observer and occupancy grid generation
@@ -50,7 +50,7 @@ game_observer_node:
 strategy_node:
   ros__parameters:
     gc_topic: "/gc_multicast_bridge/referee_messages"
-    require_gc: false
+    require_gc: true  # false só para testes sem GC (ou require_gc:=false no launch)
     max_gc_ms: 500.0
     max_pose_ms: 150.0
     max_ball_ms: 300.0
@@ -60,12 +60,19 @@ referee_state_node:
   ros__parameters:
     gc_topic: "/gc_multicast_bridge/referee_messages"
     ball_topic: "ball_data"
-    require_gc: false
+    require_gc: true  # false só para testes sem GC (ou require_gc:=false no launch)
     stale_timeout_ms: 500.0
     ball_moved_mm: 50.0
     kick_timeout_s: 10.0
     stop_speed_mps: 0.75
     play_speed_mps: 1.5
+
+# Troca de papéis atacante/zagueiro. Para trocar mais rápido, reduza os dois valores; se os
+# papéis começarem a oscilar entre os dois robôs, aumente-os de novo.
+role_assigner_node:
+  ros__parameters:
+    time_hysteresis: 1.0  # tempo mínimo (s) entre trocas (padrão do código: 2.0)
+    hysteresis: 1.5       # vantagem de custo para tomar o papel do atacante (padrão do código: 2.5)
 
 # NRF24 radio hardware bridge configuration (RX and TX addresses must be 5 characters)
 nrf24_hardware_bridge:
