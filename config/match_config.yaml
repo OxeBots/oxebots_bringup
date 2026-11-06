@@ -1,24 +1,31 @@
 /**:
   ros__parameters:
-    is_yellow_team: false
+    is_yellow_team: true
     team_size: 3
-    bt_xml_path: "master_strategy.xml"
+    bt_xml_path: "master_strategy_carry.xml"
     execution_rate: 60.0
+    # false só para testes sem GC (ou require_gc:=false no launch). Fica só aqui: vale para o
+    # referee_state_node e para os strategy_node_N (o nome numerado não casa com a seção
+    # "strategy_node:", e o ROS 2 não aceita "strategy_node_*" como nome de nó).
+    require_gc: true
+    # Tolerâncias de idade dos dados na strategy_node_N (usadas pelo IsDataFresh)
+    max_gc_ms: 500.0
+    max_pose_ms: 150.0
+    max_ball_ms: 300.0
 
-# 1. Configuração do Simulador
+# Simulator controller configuration
 grSim_controller_node:
   ros__parameters:
-    simulator_ip: "127.0.0.1" # IP do computador rodando o grSim
+    simulator_ip: "127.0.0.1"
     simulator_port: 10301
     interface_ip: ""
     command_topic: "robot_commands"
 
-# 2. Configuração do Bridge A-TEAM
+# SSL-Vision and Game Controller multicast bridges
 ssl_vision_bridge:
   ros__parameters:
     ssl_vision_ip: "224.5.23.2"
-    ssl_vision_port: 10006
-    # Removido IP fixo para evitar erro 'No such device'
+    ssl_vision_port: 10020
     net_interface_address: ""
 
 gc_multicast_bridge:
@@ -27,7 +34,16 @@ gc_multicast_bridge:
     multicast.port: 10003
     net_interface_address: ""
 
-# 3. Configuração do Observador
+team_client_node:
+  ros__parameters:
+    gc_ip_address: ""
+    gc_port: 10008
+    # Para testar com o Game Controller, altere team_name para o mesmo nome selecionado na interface do GC
+    team_name: "OxeBots"
+    # team_color não é definido aqui: o ssl-new.launch.py o deriva de is_yellow_team (topo do arquivo).
+    ping_period: 5.0
+
+# Game observer and occupancy grid generation
 game_observer_node:
   ros__parameters:
     robot_amount: 3
@@ -38,13 +54,27 @@ game_observer_node:
     publisher_topic: "game_data"
     referee_topic: "/gc_multicast_bridge/referee_messages"
 
-# 4. Configuração da Estratégia
-strategy_node:
+# Referee state node configuration
+referee_state_node:
   ros__parameters:
     gc_topic: "/gc_multicast_bridge/referee_messages"
+    ball_topic: "ball_data"
+    stale_timeout_ms: 500.0
+    ball_moved_mm: 50.0
+    kick_timeout_s: 10.0
+    stop_speed_mps: 0.75
+    play_speed_mps: 1.5
 
-# 5. Configuração da comunicação com os robôs
-#OBS: os endereços rx e tcx tem que ter 5 chars (lambda de decode no nNrf24.cpp)
+# Troca de papéis atacante/zagueiro. Para trocar mais rápido, reduza os dois valores; se os
+# papéis começarem a oscilar entre os dois robôs, aumente-os de novo.
+role_assigner_node:
+  ros__parameters:
+    time_hysteresis: 1.0  # tempo mínimo (s) entre trocas (padrão do código: 2.0)
+    hysteresis: 1.5       # vantagem de custo para tomar o papel do atacante (padrão do código: 2.5)
+    ball_flight_speed_mps: 1.0  # bola mais rápida que isto = chute em voo: papéis congelados (0 desliga)
+    receive_distance_mm: 300.0  # candidato a menos disto da bola E bola lenta (<80% do limite de voo) = recepcionou: libera a troca
+
+# NRF24 radio hardware bridge configuration (RX and TX addresses must be 5 characters)
 nrf24_hardware_bridge:
   ros__parameters:
     radio_rx_address: "ADMIN"
