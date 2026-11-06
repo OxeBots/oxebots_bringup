@@ -4,7 +4,14 @@
     team_size: 3
     bt_xml_path: "master_strategy_carry.xml"
     execution_rate: 60.0
+    # false só para testes sem GC (ou require_gc:=false no launch). Fica só aqui: vale para o
+    # referee_state_node e para os strategy_node_N (o nome numerado não casa com a seção
+    # "strategy_node:", e o ROS 2 não aceita "strategy_node_*" como nome de nó).
     require_gc: true
+    # Tolerâncias de idade dos dados na strategy_node_N (usadas pelo IsDataFresh)
+    max_gc_ms: 500.0
+    max_pose_ms: 150.0
+    max_ball_ms: 300.0
 
 # Simulator controller configuration
 grSim_controller_node:
@@ -46,21 +53,11 @@ game_observer_node:
     publisher_topic: "game_data"
     referee_topic: "/gc_multicast_bridge/referee_messages"
 
-# Strategy node configuration
-strategy_node:
-  ros__parameters:
-    gc_topic: "/gc_multicast_bridge/referee_messages"
-    require_gc: true  # false só para testes sem GC (ou require_gc:=false no launch)
-    max_gc_ms: 500.0
-    max_pose_ms: 150.0
-    max_ball_ms: 300.0
-
 # Referee state node configuration
 referee_state_node:
   ros__parameters:
     gc_topic: "/gc_multicast_bridge/referee_messages"
     ball_topic: "ball_data"
-    require_gc: true  # false só para testes sem GC (ou require_gc:=false no launch)
     stale_timeout_ms: 500.0
     ball_moved_mm: 50.0
     kick_timeout_s: 10.0
