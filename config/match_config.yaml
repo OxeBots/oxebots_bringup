@@ -2,7 +2,7 @@
   ros__parameters:
     is_yellow_team: true
     team_size: 3
-    bt_xml_path: "master_strategy_carry.xml"
+    bt_xml_path: "master_strategy_el.xml"
     execution_rate: 60.0
     # false só para testes sem GC (ou require_gc:=false no launch). Fica só aqui: vale para o
     # referee_state_node e para os strategy_node_N (o nome numerado não casa com a seção
@@ -39,7 +39,7 @@ team_client_node:
     gc_ip_address: ""
     gc_port: 10008
     # Para testar com o Game Controller, altere team_name para o mesmo nome selecionado na interface do GC
-    team_name: "OxeBots"
+    team_name: "Unknown"
     # team_color não é definido aqui: o ssl-new.launch.py o deriva de is_yellow_team (topo do arquivo).
     ping_period: 5.0
 
