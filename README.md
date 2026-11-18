@@ -28,7 +28,7 @@ oxebots_bringup/
 Os arquivos `.yaml` em `config/` centralizam os parâmetros ROS 2 compartilhados por todos os nós da arquitetura.
 
 ### 2.1. Parâmetros Globais (`/**:`)
-Aplicados a todos os nós que declaram essas chaves (`strategy_node`, `d_star_planner_node`, `role_assigner_node`, `game_observer_node`, `grSim_controller_node`, `ra_controller_node`):
+Aplicados a todos os nós que declaram essas chaves (`strategy_node`, `referee_state_node`, `d_star_planner_node`, `role_assigner_node`, `game_observer_node`, `grSim_controller_node`, `ra_controller_node`):
 
 | Parâmetro | Tipo | Valor Padrão | Descrição |
 | :--- | :--- | :--- | :--- |
@@ -36,6 +36,7 @@ Aplicados a todos os nós que declaram essas chaves (`strategy_node`, `d_star_pl
 | `team_size` | `int` | `3` | Quantidade de robôs da equipe. |
 | `bt_xml_path` | `string` | `"master_strategy_carry.xml"` | Arquivo XML principal da Behavior Tree executado pelo `strategy_node`. |
 | `execution_rate` | `double` | `60.0` | Frequência (Hz) do loop de ticks da Behavior Tree. |
+| `require_gc` | `bool` | `true` | Quando `true`, exige mensagens recentes do Game Controller para considerar os dados válidos. |
 
 ### 2.2. Controle de Simulador (`grSim_controller_node`)
 | Parâmetro | Tipo | Valor Padrão | Descrição |
@@ -45,14 +46,20 @@ Aplicados a todos os nós que declaram essas chaves (`strategy_node`, `d_star_pl
 | `interface_ip` | `string` | `""` | Interface de saída UDP (vazio usa a rota padrão do sistema). |
 | `command_topic` | `string` | `"robot_commands"` | Tópico ROS 2 assinado para receber velocidades e comandos de chute. |
 
-### 2.3. Pontes SSL-Vision e Game Controller (`ssl_vision_bridge` / `gc_multicast_bridge`)
+### 2.3. Pontes SSL-Vision e Game Controller (`ssl_vision_bridge` / `gc_multicast_bridge` / `team_client_node`)
 | Nó | Parâmetro | Valor Padrão | Descrição |
 | :--- | :--- | :--- | :--- |
 | `ssl_vision_bridge` | `ssl_vision_ip` | `"224.5.23.2"` | Grupo multicast oficial do SSL-Vision / simuladores. |
-| `ssl_vision_bridge` | `ssl_vision_port` | `10020` | Porta UDP do SSL-Vision(mudar para 10006 para o jogo real). |
+| `ssl_vision_bridge` | `ssl_vision_port` | `10020` | Porta UDP do SSL-Vision (mudar para `10006` para o jogo real). |
 | `ssl_vision_bridge` | `net_interface_address` | `""` | IP da placa de rede local para join multicast (vazio tenta todas as interfaces). |
 | `gc_multicast_bridge` | `multicast.address` | `"224.5.23.1"` | Grupo multicast oficial do SSL Game Controller. |
 | `gc_multicast_bridge` | `multicast.port` | `10003` | Porta UDP do SSL Game Controller. |
+| `gc_multicast_bridge` | `net_interface_address` | `""` | IP da placa de rede local para join multicast. |
+| `team_client_node` | `gc_ip_address` | `""` | IP do servidor do Game Controller (vazio descobre automaticamente pelo pacote multicast). |
+| `team_client_node` | `gc_port` | `10008` | Porta TCP do servidor do Game Controller para conexão do time. |
+| `team_client_node` | `team_name` | `"OxeBots"` | Nome da equipe registrado no Game Controller. |
+| `team_client_node` | `team_color` | `"yellow"` / `"blue"` | Cor do time na conexão com o Game Controller. |
+| `team_client_node` | `ping_period` | `5.0` | Período (s) de ping da conexão com o Game Controller. |
 
 ### 2.4. Observador de Jogo (`game_observer_node`)
 | Parâmetro | Tipo | Valor Padrão | Descrição |
@@ -69,7 +76,25 @@ Aplicados a todos os nós que declaram essas chaves (`strategy_node`, `d_star_pl
 | `publisher_topic` | `string` | `"game_data"` | Tópico consolidado publicado com estado de robôs e bola. |
 | `referee_topic` | `string` | `"/gc_multicast_bridge/referee_messages"` | Tópico de entrada com comandos do juiz. |
 
-### 2.5. Rádio NRF24 para Robôs Reais (`nrf24_hardware_bridge`)
+### 2.5. Estratégia e Estado do Árbitro (`strategy_node` / `referee_state_node`)
+| Nó | Parâmetro | Tipo | Valor Padrão | Descrição |
+| :--- | :--- | :--- | :--- | :--- |
+| `strategy_node` | `gc_topic` | `string` | `"/gc_multicast_bridge/referee_messages"` | Tópico com mensagens brutas do árbitro. |
+| `strategy_node` | `game_state_topic` | `string` | `"/game_state"` | Tópico com o estado de jogo consolidado pelo `referee_state_node`. |
+| `strategy_node` | `require_gc` | `bool` | `true` (`false` em `match_config.yaml`) | Exige mensagens frescas do Game Controller na validação `IsDataFresh`. |
+| `strategy_node` | `max_gc_ms` | `double` | `500.0` | Idade máxima permitida (ms) para mensagens do árbitro. |
+| `strategy_node` | `max_pose_ms` | `double` | `150.0` | Idade máxima permitida (ms) para a pose do próprio robô. |
+| `strategy_node` | `max_ball_ms` | `double` | `300.0` | Idade máxima permitida (ms) para a posição da bola. |
+| `referee_state_node` | `gc_topic` | `string` | `"/gc_multicast_bridge/referee_messages"` | Tópico de entrada do Game Controller. |
+| `referee_state_node` | `ball_topic` | `string` | `"ball_data"` | Tópico de posição da bola para detectar entrada em jogo (`PHASE_RUN`). |
+| `referee_state_node` | `require_gc` | `bool` | `true` (`false` em `match_config.yaml`) | Define se a ausência do GC marca `/game_state` como `stale`. |
+| `referee_state_node` | `stale_timeout_ms` | `double` | `500.0` | Tempo sem pacote do GC (ms) para declarar `stale = true`. |
+| `referee_state_node` | `ball_moved_mm` | `double` | `50.0` | Deslocamento da bola (mm) que confirma bola em jogo após reinício. |
+| `referee_state_node` | `kick_timeout_s` | `double` | `10.0` | Prazo padrão (s) de cobrança de tiro livre/kick-off quando o GC não informa. |
+| `referee_state_node` | `stop_speed_mps` | `double` | `0.75` | Limite de velocidade linear (m/s) publicado em `PHASE_STOP`. |
+| `referee_state_node` | `play_speed_mps` | `double` | `1.5` | Limite de velocidade linear (m/s) publicado nas fases de jogo. |
+
+### 2.6. Rádio NRF24 para Robôs Reais (`nrf24_hardware_bridge`)
 | Parâmetro | Tipo | Valor Padrão | Descrição |
 | :--- | :--- | :--- | :--- |
 | `radio_rx_address` | `string` | `"ADMIN"` | Endereço RX da estação base (exatamente 5 caracteres). |
@@ -86,20 +111,22 @@ O arquivo `ssl-new.launch.py` substitui os antigos launches separados e permite 
 ### 3.1. Nós Inicializados pelo Launch
 1. **`ssl_vision_bridge`** (`ssl_ros_bridge`): Recebe pacotes protobuf UDP do SSL-Vision e publica no ROS 2.
 2. **`gc_multicast_bridge`** (`ssl_ros_bridge`): Recebe pacotes protobuf UDP do Game Controller.
-3. **`game_observer_node`** (`oxebots_observers`): Processa visão/juiz, publica `/game_data`, `/field_geometry` (QoS `transient_local`) e a grade `/map`.
-4. **`field_visualizer_node`** (`oxebots_observers`): Desenha as linhas e dimensões reais do campo no RViz a partir de `/field_geometry`.
-5. **Driver de Comunicação (`oxebots_comms`) — selecionado via flag `mode`:**
+3. **`team_client_node`** (`ssl_ros_bridge`): Conecta ao Game Controller via TCP para serviços da equipe (`set_desired_keeper`, `substitute_bot`).
+4. **`referee_state_node`** (`oxebots_strategy`): Interpreta os comandos do Game Controller, resolve contexto de reinício e publica `/game_state` (QoS `transient_local`).
+5. **`game_observer_node`** (`oxebots_observers`): Processa visão/juiz, publica `/game_data`, `ball_data`, `robot_data`, `/field_geometry` (QoS `transient_local`) e a grade `/map`.
+6. **`field_visualizer_node`** (`oxebots_observers`): Desenha as linhas e dimensões reais do campo no RViz a partir de `/field_geometry`.
+7. **Driver de Comunicação (`oxebots_comms`) — selecionado via flag `mode`:**
    * `mode:=grsim` $\rightarrow$ Sobe `grSim_controller_node` (envia velocidades globais para o grSim).
    * `mode:=ra` $\rightarrow$ Sobe `ra_controller_node` (converte velocidades globais para referenciais locais para o simulador ER-Force/Ra).
    * `mode:=game` $\rightarrow$ Sobe `nrf24_bridge_node` (envio via rádio USB NRF24 para os robôs reais) + `ra_controller_node`.
-6. **`kalman_filter_node`** (`oxebots_prediction`): Filtragem e predição de posição/velocidade da bola e dos robôs.
-7. **`strategy.launch.py`** (`oxebots_strategy`): Sobe, para cada robô (`0, 1, 2`), o conjunto:
+8. **`kalman_filter_node`** (`oxebots_prediction`): Filtragem e predição de posição/velocidade da bola e dos robôs.
+9. **`strategy.launch.py`** (`oxebots_strategy`): Sobe, para cada robô (`0, 1, 2`), o conjunto:
    * `d_star_planner_node_<id>` (Planejamento de trajetória D* Lite / Straight Line)
-   * `path_follower_node_<id>` (`movement_calculation_node` — controle linear/angular, chute e proteção dinâmica de área)
+   * `path_follower_node_<id>` (`movement_calculation_node` — controle linear/angular, chute, SafetyGate e proteção dinâmica de área)
    * `strategy_node_<id>` (Execução da Behavior Tree e Blackboard)
    * `trajectory_setpoint_node_<id>` (Geração de setpoints de trajetória para rádio NRF24)
-8. **`role_assigner_node`** (`oxebots_strategy`): Atribuição dinâmica de papéis com histerese (`/role_assignment`).
-9. **`rviz2`** (Opcional): Interface gráfica pré-configurada com `rviz2_config.rviz`.
+10. **`role_assigner_node`** (`oxebots_strategy`): Atribuição dinâmica de papéis com histerese (`/role_assignment`).
+11. **`rviz2`** (Opcional): Interface gráfica pré-configurada com `rviz2_config.rviz`.
 
 ---
 
@@ -113,6 +140,7 @@ O arquivo `ssl-new.launch.py` substitui os antigos launches separados e permite 
 | `config_file` | Caminho para `.yaml` | `match_config.yaml` | Permite passar um arquivo YAML específico. Se vazio, usa `match_config.yaml` (ou o YAML correspondente a `team_color`). |
 | `team_color` | `blue`, `yellow`, `""` | `""` (usa o `match_config.yaml`) | Atalho opcional para carregar diretamente `match_config_blue.yaml` ou `match_config_yellow.yaml`. |
 | `bt_xml` | Nome do arquivo `.xml` | Valor do YAML (`master_strategy_carry.xml`) | Sobrescreve a árvore de comportamento em tempo de execução sem precisar editar o `.yaml`. |
+| `require_gc` | `True`, `False`, `""` | `""` (usa o valor do YAML) | Sobrescreve `require_gc` para `referee_state_node` e `strategy_node` (ex.: `require_gc:=False` para testes sem Game Controller). |
 | `use_rviz` | `True`, `False` | `True` | Abre ou oculta a janela do RViz2 (no modo de time único). |
 | `match` | `True`, `False` | `False` | Quando `True`, sobe **os dois times simultaneamente** na mesma máquina isolados por `ROS_DOMAIN_ID` (`0` = Azul, `1` = Amarelo). |
 | `rviz_team` | `none`, `blue`, `yellow`, `both` | `none` | Usado quando `match:=True` para escolher qual time abrirá janela do RViz2. |
