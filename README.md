@@ -34,7 +34,7 @@ Aplicados a todos os nós que declaram essas chaves (`strategy_node`, `referee_s
 | :--- | :--- | :--- | :--- |
 | `is_yellow_team` | `bool` | `true` / `false` | Define a cor do time (`false` = Azul, `true` = Amarelo). Ajusta portas do simulador e lado defensivo padrão. |
 | `team_size` | `int` | `3` | Quantidade de robôs da equipe. |
-| `bt_xml_path` | `string` | `"master_strategy_carry.xml"` | Arquivo XML principal da Behavior Tree executado pelo `strategy_node`. |
+| `bt_xml_path` | `string` | `"master_strategy_el.xml"` | Arquivo XML principal da Behavior Tree executado pelo `strategy_node`. |
 | `execution_rate` | `double` | `60.0` | Frequência (Hz) do loop de ticks da Behavior Tree. |
 | `require_gc` | `bool` | `true` | Quando `true`, exige mensagens recentes do Game Controller para considerar os dados válidos. |
 
@@ -69,8 +69,8 @@ Aplicados a todos os nós que declaram essas chaves (`strategy_node`, `referee_s
 | `robot_inflation_radius` | `double` | `150.0` | Raio de inflação dos obstáculos (robôs) no mapa estático em milímetros. |
 | `min_ball_confidence` | `double` | `0.3` | Confiança mínima de detecção da visão para aceitar a bola. |
 | `min_robot_confidence` | `double` | `0.3` | Confiança mínima de detecção da visão para aceitar robôs. |
-| `robot_expiration_ms` | `double` | `500.0` | Tempo sem detecção (ms) para marcar um robô como fora de campo. |
-| `ball_expiration_ms` | `double` | `500.0` | Tempo sem detecção (ms) para marcar a bola como perdida. |
+| `robot_expiration_ms` | `double` | `150.0` | Tempo sem detecção (ms) para marcar um robô como fora de campo. |
+| `ball_expiration_ms` | `double` | `300.0` | Tempo sem detecção (ms) para marcar a bola como perdida. |
 | `multi_camera_window_ms`| `double` | `8.0` | Janela de tempo (ms) para fusão de detecções redundantes entre câmeras. |
 | `vision_topic` | `string` | `"/ssl_vision_bridge/vision_messages"` | Tópico de entrada vindo da ponte de visão. |
 | `publisher_topic` | `string` | `"game_data"` | Tópico consolidado publicado com estado de robôs e bola. |
@@ -139,7 +139,7 @@ O arquivo `ssl-new.launch.py` substitui os antigos launches separados e permite 
 | `invert_sides` | `True`, `False`, `""` | Auto (`False` no `grsim` e `game`, `True` no `ra`) | Inverte as coordenadas do campo (`x = -x`, `y = -y`, `θ += π`) e o lado dos gols. Se omitido, ativa automaticamente apenas no `ra` e fica desativado (`False`) no `grsim` e `game`. Pode ser forçado manualmente em qualquer modo. |
 | `config_file` | Caminho para `.yaml` | `match_config.yaml` | Permite passar um arquivo YAML específico. Se vazio, usa `match_config.yaml` (ou o YAML correspondente a `team_color`). |
 | `team_color` | `blue`, `yellow`, `""` | `""` (usa o `match_config.yaml`) | Atalho opcional para carregar diretamente `match_config_blue.yaml` ou `match_config_yellow.yaml`. |
-| `bt_xml` | Nome do arquivo `.xml` | Valor do YAML (`master_strategy_carry.xml`) | Sobrescreve a árvore de comportamento em tempo de execução sem precisar editar o `.yaml`. |
+| `bt_xml` | Nome do arquivo `.xml` | Valor do YAML (`master_strategy_el.xml`) | Sobrescreve a árvore de comportamento em tempo de execução sem precisar editar o `.yaml`. |
 | `require_gc` | `True`, `False`, `""` | `""` (usa o valor do YAML) | Sobrescreve `require_gc` para `referee_state_node` e `strategy_node` (ex.: `require_gc:=False` para testes sem Game Controller). |
 | `use_rviz` | `True`, `False` | `True` | Abre ou oculta a janela do RViz2 (no modo de time único). |
 | `match` | `True`, `False` | `False` | Quando `True`, sobe **os dois times simultaneamente** na mesma máquina isolados por `ROS_DOMAIN_ID` (`0` = Azul, `1` = Amarelo). |
