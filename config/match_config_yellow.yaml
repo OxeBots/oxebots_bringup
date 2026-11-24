@@ -64,7 +64,9 @@ referee_state_node:
 # NRF24 radio hardware bridge configuration (RX and TX addresses must be 5 characters)
 nrf24_hardware_bridge:
   ros__parameters:
-    radio_rx_address: "ADMIN"
-    radio_tx_address: "ESP32"
-    radio_frequency: 2.476
-    radio_rate: 3
+    radio_rx_address: "ADMIN"         # Endereço RX local do dongle USB (Pipe 0)
+    radio_tx_address: "ESP32"         # Endereço TX destino (robôs ESP32)
+    radio_frequency: 2.476            # Frequência em GHz (2.476 GHz = Canal 76 do nRF24L01+)
+    radio_rate: 3                     # Taxa de dados no ar (1=250Kbps, 2=1Mbps, 3=2Mbps)
+    command_mode: "velocity"          # "velocity" (/robot_commands) ou "point" (/robot_trajectory_setpoints)
+    telemetry_request_interval: 5     # Solicita telemetria a cada N comandos por robô (0 = desativa telemetria)
