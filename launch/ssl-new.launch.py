@@ -44,6 +44,19 @@ def read_is_yellow_team(config_paths):
     return is_yellow
 
 
+def sanitize_empty_kickers_override(config_paths):
+    """Return [{'operational_kickers': [-1]}] if any YAML sets operational_kickers to [] or None."""
+    needs_override = False
+    for path in config_paths:
+        with open(path) as config:
+            data = yaml.safe_load(config) or {}
+        params = (data.get('/**') or {}).get('ros__parameters') or {}
+        if 'operational_kickers' in params:
+            val = params['operational_kickers']
+            needs_override = (val is None or (isinstance(val, list) and len(val) == 0))
+    return [{'operational_kickers': [-1]}] if needs_override else []
+
+
 def create_team_stack(
     config_file,
     strategy_pkg_share,
@@ -58,9 +71,10 @@ def create_team_stack(
     """Create the list of nodes and launch actions for a single team stack."""
     bringup_pkg_share = get_package_share_directory('oxebots_bringup')
     base_config = os.path.join(bringup_pkg_share, 'config', 'match_config.yaml')
-    config_params = [base_config]
+    yaml_files = [base_config]
     if os.path.abspath(config_file) != os.path.abspath(base_config):
-        config_params.append(config_file)
+        yaml_files.append(config_file)
+    config_params = [*yaml_files, *sanitize_empty_kickers_override(yaml_files)]
 
     vision_bridge = Node(
         package='ssl_ros_bridge',
@@ -81,7 +95,7 @@ def create_team_stack(
     # O team_client_node não lê is_yellow_team (ele é do pacote ssl_ros_bridge): a cor com que ele
     # se registra no GC vem do mesmo is_yellow_team do YAML, para existir uma fonte só.
     team_client_params = list(config_params)
-    is_yellow_team = read_is_yellow_team(config_params)
+    is_yellow_team = read_is_yellow_team(yaml_files)
     if is_yellow_team is not None:
         team_client_params.append({'team_color': 'yellow' if is_yellow_team else 'blue'})
 

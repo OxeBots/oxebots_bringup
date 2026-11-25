@@ -37,6 +37,7 @@ Aplicados a todos os nós que declaram essas chaves (`strategy_node`, `referee_s
 | `bt_xml_path` | `string` | `"master_strategy_el.xml"` | Arquivo XML principal da Behavior Tree executado pelo `strategy_node`. |
 | `execution_rate` | `double` | `60.0` | Frequência (Hz) do loop de ticks da Behavior Tree. |
 | `require_gc` | `bool` | `true` | Quando `true`, exige mensagens recentes do Game Controller para considerar os dados válidos. |
+| `operational_kickers` | `int[]` | `[0, 1, 2]` | IDs dos robôs com kicker funcional. Veja a seção 2.7. |
 
 ### 2.2. Controle de Simulador (`grSim_controller_node`)
 | Parâmetro | Tipo | Valor Padrão | Descrição |
@@ -101,6 +102,40 @@ Aplicados a todos os nós que declaram essas chaves (`strategy_node`, `referee_s
 | `radio_tx_address` | `string` | `"ESP32"` | Endereço TX dos robôs (exatamente 5 caracteres). |
 | `radio_frequency` | `double` | `2.476` | Frequência do canal de rádio em GHz. |
 | `radio_rate` | `int` | `3` | Taxa de transmissão configurada via comandos AT no módulo serial USB. |
+
+### 2.7. Robôs com Kicker Quebrado (`operational_kickers`)
+
+Lista global (em `/**`) com os IDs dos robôs cujo chute está funcionando. Vale para todos os nós, então basta editar uma linha em `match_config.yaml` (ou nos YAMLs `blue`/`yellow`):
+
+```yaml
+/**:
+  ros__parameters:
+    operational_kickers: [0, 2]   # robô 1 está sem chute
+```
+
+| Valor | Efeito |
+| :--- | :--- |
+| `[0, 1, 2]` (padrão) | Todos chutam normalmente. |
+| `[0, 2]` | O robô 1 não aciona o solenoide: nas jogadas de chute ele dá uma arrancada de corpo (`kick_speed = 0`) e freia para a bola seguir rolando. |
+| `[-1]` | Nenhum robô tem kicker. |
+
+**Atenção:** nunca use `[]` (lista vazia). O parser YAML do ROS 2 não aceita e todos os nós caem no `launch` com `InvalidParameterValueException`. Para "nenhum robô", use `[-1]`.
+
+O que muda quando um robô fica sem kicker:
+- **Cobrador de bola parada** (falta, escanteio, lateral, kick-off, pênalti): o `role_assigner_node` escolhe primeiro um robô de linha (nunca o goleiro) com kicker funcional. Só se nenhum tiver, usa o mais próximo da bola.
+- **Jogo corrido, bola parada, goleiro:** as árvores continuam iguais (mesma aproximação e contorno); só o disparo do solenoide é suprimido, em `KickBall` e `KickOnce`.
+- **Troca de goleiro:** se o kicker quebrar num robô de linha, o ideal é pedir timeout e colocá-lo no gol (troca do goleiro no Game Controller). O `role_assigner_node` segue o `our_goalkeeper_id` do GC.
+
+Não precisa recompilar para mudar a lista: o `build.sh` usa `--symlink-install`, basta reiniciar o launch.
+
+### 2.8. Goleiro Sozinho em Campo ("Goleiro-Atacante")
+
+Se só o goleiro estiver em campo (dois cartões, robôs fora de visão, `max_allowed_bots = 1`), ele deixa de ficar parado no gol:
+- **Nossa bola parada** (kick-off, falta, pênalti): ele vira o cobrador.
+- **Jogo corrido (`RUN`) com a bola fora da nossa área:** ele sai da área, disputa a bola e ataca (`AttackerTree`).
+- **Bola na nossa área ou bola parada do adversário:** continua defendendo o gol normalmente.
+
+Obs. para simulação: o "Turn Off" do grSim só desliga as rodas, o robô continua visível na câmera. Para simular robôs removidos, aplique cartões no Game Controller ou tire os robôs do campo.
 
 ---
 
