@@ -12,6 +12,18 @@
     max_gc_ms: 500.0
     max_pose_ms: 150.0
     max_ball_ms: 300.0
+    # Piso global de velocidades (m/s e rad/s) herdado por todos os nós de estratégia.
+    # 0.0 desativa o piso. Comandos parados (HALT, TIMEOUT, arrived, watchdog) permanecem 0.0
+    # e o teto máximo (com todas as suas exceções) sempre tem precedência sobre a mínima.
+    min_linear_speed: 0.350
+    min_angular_speed: 1.400
+    p_gain_linear: 2.50
+    d_gain_linear: 0.00
+    p_gain_angular: 2.20
+    d_gain_angular: 0.25
+    lookahead_distance: 140.0
+    use_kalman_filter: true
+    latency_comp_s: 0.045
 
 # Simulator controller configuration
 grSim_controller_node:
