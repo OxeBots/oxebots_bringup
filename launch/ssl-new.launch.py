@@ -67,13 +67,18 @@ def create_team_stack(
     use_rviz,
     command_mode='velocity',
     require_gc='',
+    override_config_file='',
 ):
     """Create the list of nodes and launch actions for a single team stack."""
     bringup_pkg_share = get_package_share_directory('oxebots_bringup')
     base_config = os.path.join(bringup_pkg_share, 'config', 'match_config.yaml')
     yaml_files = [base_config]
     if os.path.abspath(config_file) != os.path.abspath(base_config):
-        yaml_files.append(config_file)
+        yaml_files.append(os.path.abspath(config_file))
+    if override_config_file:
+        abs_override = os.path.abspath(override_config_file)
+        if abs_override not in [os.path.abspath(p) for p in yaml_files]:
+            yaml_files.append(abs_override)
     config_params = [*yaml_files, *sanitize_empty_kickers_override(yaml_files)]
 
     vision_bridge = Node(
@@ -174,9 +179,11 @@ def create_team_stack(
     )
 
     strategy_args = {
-        'config_file': config_file,
+        'config_file': os.path.abspath(config_file),
         'invert_sides': 'True' if invert_sides else 'False',
     }
+    if override_config_file:
+        strategy_args['override_config_file'] = os.path.abspath(override_config_file)
     if bt_xml:
         strategy_args['bt_xml'] = bt_xml
     if require_gc:
@@ -286,6 +293,7 @@ def launch_setup(context, *args, **kwargs):
                 blue_rviz,
                 command_mode=command_mode,
                 require_gc=require_gc,
+                override_config_file=config_file,
             )
             actions.append(
                 GroupAction([
@@ -309,6 +317,7 @@ def launch_setup(context, *args, **kwargs):
                 yellow_rviz,
                 command_mode=command_mode,
                 require_gc=require_gc,
+                override_config_file=config_file,
             )
             actions.append(
                 GroupAction([
@@ -320,22 +329,26 @@ def launch_setup(context, *args, **kwargs):
         return actions
 
     # Single-team mode
-    if not config_file:
-        if team_color == 'yellow':
-            config_file = os.path.join(
-                bringup_pkg_share, 'config', 'match_config_yellow.yaml'
-            )
-        elif team_color == 'blue':
-            config_file = os.path.join(
-                bringup_pkg_share, 'config', 'match_config_blue.yaml'
-            )
-        else:
-            config_file = os.path.join(
-                bringup_pkg_share, 'config', 'match_config.yaml'
-            )
+    override_config = ''
+    if team_color == 'yellow':
+        team_config = os.path.join(
+            bringup_pkg_share, 'config', 'match_config_yellow.yaml'
+        )
+        override_config = config_file
+    elif team_color == 'blue':
+        team_config = os.path.join(
+            bringup_pkg_share, 'config', 'match_config_blue.yaml'
+        )
+        override_config = config_file
+    elif config_file:
+        team_config = os.path.abspath(config_file)
+    else:
+        team_config = os.path.join(
+            bringup_pkg_share, 'config', 'match_config.yaml'
+        )
 
     return create_team_stack(
-        config_file,
+        team_config,
         strategy_pkg_share,
         rviz_config_file,
         mode,
@@ -344,6 +357,7 @@ def launch_setup(context, *args, **kwargs):
         use_rviz,
         command_mode=command_mode,
         require_gc=require_gc,
+        override_config_file=override_config,
     )
 
 
