@@ -12,10 +12,12 @@
     max_gc_ms: 500.0
     max_pose_ms: 150.0
     max_ball_ms: 300.0
-    # Piso global de velocidades (m/s e rad/s) herdado por todos os nós de estratégia.
-    # 0.0 desativa o piso. Comandos parados (HALT, TIMEOUT, arrived, watchdog) permanecem 0.0
-    # e o teto máximo (com todas as suas exceções) sempre tem precedência sobre a mínima.
+    # Limites globais de velocidades (m/s e rad/s) herdados por todos os nós de estratégia.
+    # O SafetyGate sempre faz prevalecer limites de fase (HALT=0.0, STOP=0.75, PLAY=1.5 m/s).
+    # min_* = 0.0 desativa o piso. Comandos parados (HALT, TIMEOUT, arrived, watchdog) permanecem 0.0.
+    max_linear_speed: 1.500
     min_linear_speed: 0.350
+    max_angular_speed: 4.500
     min_angular_speed: 1.400
     p_gain_linear: 2.50
     d_gain_linear: 0.00
@@ -24,6 +26,22 @@
     lookahead_distance: 140.0
     use_kalman_filter: true
     latency_comp_s: 0.045
+    # Estratégia de cartão amarelo (-1 robô, has_defender=false) com a bola no nosso campo:
+    #   false = Opção A (contenção: marca adversário com posse a 280 mm; se a bola soltar fora da área, intercepta e afasta)
+    #   true  = Opção B (pressão total: intercepta e afasta qualquer bola fora da pequena área, mesmo com adversário colado)
+    alone_defender_aggressive: true
+
+# Ajustes dedicados ao goleiro (Robô 0):
+# A boca do gol tem ~1 m, então quase toda defesa percorre 150-400 mm. Com p_gain_linear=5.0,
+# o goleiro já atinge 1.5 m/s a partir de 30 cm, com amortecimento suave na chegada (d_gain_linear=0.12).
+path_follower_node_0:
+  ros__parameters:
+    p_gain_linear: 5.00
+    d_gain_linear: 0.12
+
+d_star_planner_node_0:
+  ros__parameters:
+    planning_rate_hz: 40.0
 
 # Simulator controller configuration
 grSim_controller_node:
@@ -37,7 +55,7 @@ grSim_controller_node:
 ssl_vision_bridge:
   ros__parameters:
     ssl_vision_ip: "224.5.23.2"
-    ssl_vision_port: 10006
+    ssl_vision_port: 10020
     net_interface_address: ""
 
 gc_multicast_bridge:
