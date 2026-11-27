@@ -19,7 +19,7 @@
     min_linear_speed: 0.350
     max_angular_speed: 4.500
     min_angular_speed: 1.400
-    p_gain_linear: 2.50
+    p_gain_linear: 10.0
     d_gain_linear: 0.00
     p_gain_angular: 2.20
     d_gain_angular: 0.25
@@ -92,8 +92,8 @@ referee_state_node:
     stale_timeout_ms: 500.0
     ball_moved_mm: 50.0
     kick_timeout_s: 10.0
-    stop_speed_mps: 0.75
-    play_speed_mps: 1.5
+    stop_speed_mps: 3.0
+    play_speed_mps: 10.0
 
 # Troca de papéis atacante/zagueiro. Para trocar mais rápido, reduza os dois valores; se os
 # papéis começarem a oscilar entre os dois robôs, aumente-os de novo.
@@ -104,12 +104,39 @@ role_assigner_node:
     ball_flight_speed_mps: 1.0  # bola mais rápida que isto = chute em voo: papéis congelados (0 desliga)
     receive_distance_mm: 300.0  # candidato a menos disto da bola E bola lenta (<80% do limite de voo) = recepcionou: libera a troca
 
-# NRF24 radio hardware bridge configuration (RX and TX addresses must be 5 characters)
+# ESP32 Base Station Dual-nRF24L01+ Full-Duplex hardware bridge configuration
 nrf24_hardware_bridge:
   ros__parameters:
-    radio_rx_address: "ADMIN"         # Endereço RX local do dongle USB (Pipe 0)
-    radio_tx_address: "ESP32"         # Endereço TX destino (robôs ESP32)
-    radio_frequency: 2.476            # Frequência em GHz (2.476 GHz = Canal 76 do nRF24L01+)
-    radio_rate: 3                     # Taxa de dados no ar (1=250Kbps, 2=1Mbps, 3=2Mbps)
+    serial_port: "auto"               # "auto" detecta a ESP32 Base Station via BS_MSG_PING
+    serial_baud: 921600               # Baud rate UART0 COBS+CRC8
+    radio_channel: 76                 # Canal TX inicial (downlink Base->Robôs, 0..125)
+    radio_rx_channel: 90              # Canal RX inicial Full-Duplex (uplink Robôs->Base, +14 MHz)
+    radio_rate: 1                     # 0=1Mbps, 1=2Mbps, 2=250Kbps
+    radio_pa_level: 3                 # 0=MIN, 1=LOW, 2=HIGH, 3=MAX (0 dBm)
+    radio_retransmit_delay: 1         # ARD: (val + 1) * 250 us -> 500 us
+    radio_retransmit_count: 3         # ARC: retentativas rápidas em hardware
+    auto_select_channel: false        # Gerenciado pelo radio_channel_manager_node
     command_mode: "velocity"          # "velocity" (/robot_commands) ou "point" (/robot_trajectory_setpoints)
-    telemetry_request_interval: 5     # Solicita telemetria a cada N comandos por robô (0 = desativa telemetria)
+    telemetry_request_interval: 5     # Solicita telemetria a cada N comandos por robô (0 = desativa)
+
+# Gerenciador automático de espectro e par Full-Duplex (TX/RX)
+radio_channel_manager:
+  ros__parameters:
+    scan_on_startup: true
+    startup_delay_s: 2.0
+    periodic_scan_interval_s: 30.0
+    scan_samples_per_channel: 24
+    min_channel_separation: 10        # Separação mínima TX/RX em MHz (piso seletividade 2 Mbps)
+    optimal_channel_separation: 14    # Separação ótima TX/RX em MHz na faixa limpa 100..124
+    startup_busy_threshold_pct: 15
+    periodic_busy_threshold_pct: 25
+    min_busy_improvement_pct: 15
+    loss_ack_threshold_pct: 85.0      # Gatilho reativo de perda no downlink (TX ACK%)
+    loss_retry_threshold: 1.5
+    loss_tel_rx_threshold_pct: 75.0   # Gatilho reativo de perda no uplink (telemetria RX%)
+    loss_confirm_windows: 3           # 3 janelas de 0.5 s = 1.5 s contínuos de perda
+    min_window_tx: 20
+    min_window_tel_req: 6
+    migration_max_attempts: 15
+    migration_cooldown_s: 20.0
+    periodic_only_when_stopped: false
