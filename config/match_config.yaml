@@ -26,22 +26,22 @@
     lookahead_distance: 140.0
     use_kalman_filter: true
     latency_comp_s: 0.045
+    goalkeeper_id: 0
+    # Ajustes para visão real ruidosa (Kalman da bola)
+    ball_pos_measurement_noise: 12.0
+    ball_kick_threshold_mm: 95.0
+    # Ajustes dedicados ao goleiro dinâmico (aplicados ao robô que assumir o papel de goleiro):
+    gk_p_gain_linear: 6.50
+    gk_d_gain_linear: 0.18
+    gk_min_linear_speed: 0.150
+    gk_max_linear_speed: 1.500
+    gk_min_angular_speed: 0.000
+    gk_angle_tolerance: 0.18
+    gk_arrived_deadband_mm: 30.0
     # Estratégia de cartão amarelo (-1 robô, has_defender=false) com a bola no nosso campo:
     #   false = Opção A (contenção: marca adversário com posse a 280 mm; se a bola soltar fora da área, intercepta e afasta)
     #   true  = Opção B (pressão total: intercepta e afasta qualquer bola fora da pequena área, mesmo com adversário colado)
     alone_defender_aggressive: true
-
-# Ajustes dedicados ao goleiro (Robô 0):
-# A boca do gol tem ~1 m, então quase toda defesa percorre 150-400 mm. Com p_gain_linear=5.0,
-# o goleiro já atinge 1.5 m/s a partir de 30 cm, com amortecimento suave na chegada (d_gain_linear=0.12).
-path_follower_node_0:
-  ros__parameters:
-    p_gain_linear: 5.00
-    d_gain_linear: 0.12
-
-d_star_planner_node_0:
-  ros__parameters:
-    planning_rate_hz: 40.0
 
 # Simulator controller configuration
 grSim_controller_node:
@@ -55,7 +55,7 @@ grSim_controller_node:
 ssl_vision_bridge:
   ros__parameters:
     ssl_vision_ip: "224.5.23.2"
-    ssl_vision_port: 10020
+    ssl_vision_port: 10006
     net_interface_address: ""
 
 gc_multicast_bridge:
@@ -69,7 +69,7 @@ team_client_node:
     gc_ip_address: ""
     gc_port: 10008
     # Para testar com o Game Controller, altere team_name para o mesmo nome selecionado na interface do GC
-    team_name: "Unknown"
+    team_name: "OMID"
     # team_color não é definido aqui: o ssl-new.launch.py o deriva de is_yellow_team (topo do arquivo).
     ping_period: 5.0
 
@@ -92,8 +92,8 @@ referee_state_node:
     stale_timeout_ms: 500.0
     ball_moved_mm: 50.0
     kick_timeout_s: 10.0
-    stop_speed_mps: 3.0
-    play_speed_mps: 10.0
+    stop_speed_mps: 0.75
+    play_speed_mps: 2.0
 
 # Troca de papéis atacante/zagueiro. Para trocar mais rápido, reduza os dois valores; se os
 # papéis começarem a oscilar entre os dois robôs, aumente-os de novo.
