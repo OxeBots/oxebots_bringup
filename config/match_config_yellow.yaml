@@ -58,8 +58,8 @@ referee_state_node:
     stale_timeout_ms: 500.0
     ball_moved_mm: 50.0
     kick_timeout_s: 10.0
-    stop_speed_mps: 0.75
-    play_speed_mps: 1.5
+    stop_speed_mps: 3.0
+    play_speed_mps: 10.0
 
 # NRF24 radio hardware bridge configuration (RX and TX addresses must be 5 characters)
 nrf24_hardware_bridge:
