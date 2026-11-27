@@ -54,6 +54,7 @@ def create_team_stack(
     use_rviz,
     command_mode='velocity',
     require_gc='',
+    enable_channel_manager=True,
 ):
     """Create the list of nodes and launch actions for a single team stack."""
     bringup_pkg_share = get_package_share_directory('oxebots_bringup')
@@ -143,6 +144,15 @@ def create_team_stack(
             parameters=config_params,
         )
         comm_nodes.extend([nrf24_bridge, ra_controller])
+        if enable_channel_manager:
+            channel_manager = Node(
+                package='oxebots_comms',
+                executable='radio_channel_manager_node',
+                name='radio_channel_manager',
+                parameters=config_params,
+                output='screen',
+            )
+            comm_nodes.append(channel_manager)
     else:
         grsim_controller = Node(
             package='oxebots_comms',
@@ -235,6 +245,10 @@ def launch_setup(context, *args, **kwargs):
         LaunchConfiguration('match').perform(context).strip().lower()
         in ['true', '1', 'yes']
     )
+    enable_channel_manager = (
+        LaunchConfiguration('enable_channel_manager').perform(context).strip().lower()
+        in ['true', '1', 'yes']
+    )
 
     # Default invert_sides to True only for 'ra', and False for 'grsim' and 'game'
     if invert_sides_raw in ['true', '1', 'yes']:
@@ -272,6 +286,7 @@ def launch_setup(context, *args, **kwargs):
                 blue_rviz,
                 command_mode=command_mode,
                 require_gc=require_gc,
+                enable_channel_manager=enable_channel_manager,
             )
             actions.append(
                 GroupAction([
@@ -295,6 +310,7 @@ def launch_setup(context, *args, **kwargs):
                 yellow_rviz,
                 command_mode=command_mode,
                 require_gc=require_gc,
+                enable_channel_manager=enable_channel_manager,
             )
             actions.append(
                 GroupAction([
@@ -330,6 +346,7 @@ def launch_setup(context, *args, **kwargs):
         use_rviz,
         command_mode=command_mode,
         require_gc=require_gc,
+        enable_channel_manager=enable_channel_manager,
     )
 
 
@@ -416,6 +433,12 @@ def generate_launch_description():
         description="Override require_gc for referee and strategy (e.g. 'False' for standalone testing without GC)",
     )
 
+    declare_enable_channel_manager_arg = DeclareLaunchArgument(
+        'enable_channel_manager',
+        default_value='True',
+        description='When mode:=game, launch radio_channel_manager_node for automatic RF scanning and channel migration',
+    )
+
     return LaunchDescription([
         declare_mode_arg,
         declare_command_mode_arg,
@@ -429,5 +452,6 @@ def generate_launch_description():
         declare_bt_xml_arg,
         declare_use_rviz_arg,
         declare_require_gc_arg,
+        declare_enable_channel_manager_arg,
         OpaqueFunction(function=launch_setup),
     ])

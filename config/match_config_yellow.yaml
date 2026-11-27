@@ -61,12 +61,38 @@ referee_state_node:
     stop_speed_mps: 3.0
     play_speed_mps: 10.0
 
-# NRF24 radio hardware bridge configuration (RX and TX addresses must be 5 characters)
+# ESP32 Base Station Dual-nRF24L01+ Full-Duplex hardware bridge configuration
 nrf24_hardware_bridge:
   ros__parameters:
-    radio_rx_address: "ADMIN"         # Endereço RX local do dongle USB (Pipe 0)
-    radio_tx_address: "ESP32"         # Endereço TX destino (robôs ESP32)
-    radio_frequency: 2.476            # Frequência em GHz (2.476 GHz = Canal 76 do nRF24L01+)
-    radio_rate: 3                     # Taxa de dados no ar (1=250Kbps, 2=1Mbps, 3=2Mbps)
-    command_mode: "velocity"          # "velocity" (/robot_commands) ou "point" (/robot_trajectory_setpoints)
-    telemetry_request_interval: 5     # Solicita telemetria a cada N comandos por robô (0 = desativa telemetria)
+    serial_port: "auto"
+    serial_baud: 921600
+    radio_channel: 76
+    radio_rx_channel: 90
+    radio_rate: 1
+    radio_pa_level: 3
+    radio_retransmit_delay: 1
+    radio_retransmit_count: 3
+    auto_select_channel: false
+    command_mode: "velocity"
+    telemetry_request_interval: 5
+
+radio_channel_manager:
+  ros__parameters:
+    scan_on_startup: true
+    startup_delay_s: 2.0
+    periodic_scan_interval_s: 30.0
+    scan_samples_per_channel: 24
+    min_channel_separation: 10
+    optimal_channel_separation: 14
+    startup_busy_threshold_pct: 15
+    periodic_busy_threshold_pct: 25
+    min_busy_improvement_pct: 15
+    loss_ack_threshold_pct: 85.0
+    loss_retry_threshold: 1.5
+    loss_tel_rx_threshold_pct: 75.0
+    loss_confirm_windows: 3
+    min_window_tx: 20
+    min_window_tel_req: 6
+    migration_max_attempts: 15
+    migration_cooldown_s: 20.0
+    periodic_only_when_stopped: false
