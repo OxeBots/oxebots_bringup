@@ -4,7 +4,7 @@
     team_size: 3
     bt_xml_path: "master_strategy_el.xml"
     execution_rate: 60.0
-    operational_kickers: [-1]
+    operational_kickers: [0, 1, 2]
 
 # Simulator controller configuration
 grSim_controller_node:
